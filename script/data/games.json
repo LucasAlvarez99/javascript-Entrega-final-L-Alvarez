@@ -1,0 +1,34 @@
+{
+  "juegos": [
+    {
+      "id": 1,
+      "nombre": "The Last Adventure",
+      "precio": 59.99,
+      "categoria": "aventura",
+      "imagen": "https://via.placeholder.com/300x200/667eea/white?text=The+Last+Adventure",
+      "descripcion": "Una épica aventura en mundo abierto llena de misterios y desafíos.",
+      "desarrollador": "Epic Games Studio",
+      "lanzamiento": "2024"
+    },
+    {
+      "id": 2,
+      "nombre": "Cyber Strike",
+      "precio": 49.99,
+      "categoria": "acción",
+      "imagen": "https://via.placeholder.com/300x200/764ba2/white?text=Cyber+Strike",
+      "descripcion": "Shooter en primera persona con gráficos de última generación.",
+      "desarrollador": "Neon Interactive",
+      "lanzamiento": "2023"
+    },
+    {
+      "id": 3,
+      "nombre": "Football Pro 2024",
+      "precio": 39.99,
+      "categoria": "deportes",
+      "imagen": "https://via.placeholder.com/300x200/f093fb/white?text=Football+Pro+2024",
+      "descripcion": "El simulador de fútbol más realista del mercado.",
+      "desarrollador": "Sports Games Inc",
+      "lanzamiento": "2024"
+    }
+  ]
+}
