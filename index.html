@@ -1,118 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameStore - Tienda de Videojuegos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./styles/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda de Juegos - L. Alvarez</title>
+  <link rel="stylesheet" href="styles/style.css" />
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3 mb-0">🎮 GameStore</h1>
-                <div class="d-flex gap-2">
-                    <button id="themeToggle" class="btn btn-outline-secondary btn-sm">
-                        🌙 Modo Oscuro
-                    </button>
-                    <button id="addGameBtn" class="btn btn-success btn-sm">
-                        ➕ Agregar Juego
-                    </button>
-                </div>
-            </div>
-            <!-- Cotización del Dólar -->
-            <div class="row mt-2 text-center" id="dolarInfo">
-                <div class="col-md-4">
-                    <small>Dólar Oficial Compra: <span id="dolarCompra">Cargando...</span></small>
-                </div>
-                <div class="col-md-4">
-                    <small>Dólar Oficial Venta: <span id="dolarVenta">Cargando...</span></small>
-                </div>
-                <div class="col-md-4">
-                    <small>Actualizado: <span id="dolarFecha">--</span></small>
-                </div>
-            </div>
-        </div>
-    </header>
+  <header class="header">
+    <div class="left-header">
+      <h1 class="titulo">🎮 Tienda de Juegos</h1>
+      <div id="cotizacion" class="cotizacion">
+        <span id="cotizacion-texto">💵 Cargando cotización...</span>
+        <div class="spinner hidden" id="spinner"></div>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <main class="container my-4">
-        <!-- Filtros -->
-        <section class="row mb-4">
-            <div class="col-md-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="Buscar juegos...">
-            </div>
-            <div class="col-md-6">
-                <select id="categoryFilter" class="form-select">
-                    <option value="all">Todas las categorías</option>
-                    <option value="acción">Acción</option>
-                    <option value="aventura">Aventura</option>
-                    <option value="deportes">Deportes</option>
-                    <option value="estrategia">Estrategia</option>
-                </select>
-            </div>
-        </section>
+    <div class="right-header">
+      <button id="themeToggle" class="btn-header">😇 Modo Celestial</button>
+      <button id="currencyToggle" class="btn-header">💰 ARS</button>
+      <button id="abrirForm" class="btn-header">➕ Agregar Juego</button>
+    </div>
+  </header>
 
-        <!-- Catálogo -->
-        <section class="row mb-5">
-            <div class="col-12">
-                <h2 class="h4 mb-3">Catálogo de Juegos</h2>
-                <div id="gamesContainer" class="row">
-                    <div class="col-12 text-center">
-                        <div class="spinner-border" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                        <p class="mt-2">Cargando juegos...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <main>
+    <section id="productos" class="productos"></section>
 
-        <!-- Carrito -->
-        <section class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="h5 mb-0">🛒 Carrito de Compras</h3>
-                    </div>
-                    <div class="card-body">
-                        <div id="cartItems">
-                            <p class="text-muted">El carrito está vacío</p>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <strong>Total: $<span id="cartTotal">0</span></strong>
-                            <div>
-                                <button id="clearCart" class="btn btn-outline-danger btn-sm">Vaciar Carrito</button>
-                                <button id="checkoutBtn" class="btn btn-success btn-sm">Finalizar Compra</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+    <section id="carrito" class="carrito">
+      <h2>🛒 Carrito</h2>
+      <div id="carrito-lista"></div>
+      <p id="total"></p>
+      <button id="vaciarCarrito" class="btn">Vaciar carrito</button>
+    </section>
+  </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2024 GameStore - Simulador Interactivo</p>
-        </div>
-    </footer>
+  <!-- Modal para agregar producto -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="cerrarModal" class="close">&times;</span>
+      <h2>➕ Agregar Juego</h2>
+      <form id="form-agregar">
+        <label>Nombre:</label>
+        <input type="text" id="nombre" required />
 
-    <!-- SweetAlert -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Módulos -->
-    <script src="./scripts/utils/storage.js"></script>
-    <script src="./scripts/utils/helpers.js"></script>
-    <script src="./scripts/modules/themeManager.js"></script>
-    <script src="./scripts/modules/apiService.js"></script>
-    <script src="./scripts/modules/gameManager.js"></script>
-    <script src="./scripts/modules/cartManager.js"></script>
-    <script src="./scripts/modules/uiRenderer.js"></script>
-    <script src="./scripts/core/config.js"></script>
-    <script src="./scripts/core/main.js"></script>
+        <label>Precio (USD):</label>
+        <input type="number" id="precio" step="0.01" required />
+
+        <label>Categoría:</label>
+        <input type="text" id="categoria" required />
+
+        <label>Imagen:</label>
+        <input type="file" id="imagen" accept="image/*" required />
+
+        <label>Descripción:</label>
+        <textarea id="descripcion" required></textarea>
+
+        <label>Desarrollador:</label>
+        <input type="text" id="desarrollador" required />
+
+        <label>Fecha de lanzamiento:</label>
+        <input type="date" id="lanzamiento" required />
+
+        <button type="submit" class="btn">Guardar</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Proyecto Final - Lucas Alvarez</p>
+  </footer>
+
+  <script type="module" src="script/core/main.js"></script>
 </body>
 </html>

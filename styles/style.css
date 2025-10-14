@@ -1,121 +1,336 @@
-/* Variables CSS para temas */
+/* ===========================
+   ESTILOS BASE
+=========================== */
 :root {
-    /* Colores modo celestial (claro) */
-    --celestial-bg: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
-    --celestial-header: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
-    --celestial-card: rgba(255, 255, 255, 0.95);
-    --celestial-text: #1565c0;
-    --celestial-primary: #2196f3;
-    --celestial-accent: #1976d2;
-    
-    /* Colores modo diabólico (oscuro) */
-    --diabolical-bg: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 50%, #1f1f1f 100%);
-    --diabolical-header: linear-gradient(135deg, #b71c1c 0%, #7f0000 100%);
-    --diabolical-card: rgba(40, 40, 40, 0.95);
-    --diabolical-text: #ffcccb;
-    --diabolical-primary: #ff4444;
-    --diabolical-accent: #cc0000;
+  --bg-color: #e6f4ff;
+  --text-color: #0d1b2a;
+  --card-bg: #ffffff;
+  --accent-color: #2b7fff;
+  --btn-bg: #2b7fff;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.15);
 }
 
-/* Modo Celestial (Claro) */
-[data-theme="light"] {
-    background: var(--celestial-bg);
-    color: var(--celestial-text);
-}
-
-[data-theme="light"] .header {
-    background: var(--celestial-header);
-    color: white;
-}
-
-[data-theme="light"] .footer {
-    background: var(--celestial-header);
-    color: white;
-}
-
-[data-theme="light"] .card {
-    background: var(--celestial-card);
-    border: none;
-    box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15);
-}
-
-[data-theme="light"] .btn-add-cart {
-    background: linear-gradient(135deg, var(--celestial-primary), var(--celestial-accent));
-    color: white;
-}
-
-[data-theme="light"] .price-tag {
-    color: var(--celestial-accent);
-}
-
-/* Modo Diabólico (Oscuro) */
 [data-theme="dark"] {
-    background: var(--diabolical-bg);
-    color: var(--diabolical-text);
+  --bg-color: #0a0a0a;
+  --text-color: #ff4444;
+  --card-bg: #1a0000;
+  --accent-color: #ff0000;
+  --btn-bg: #990000;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(255, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .header {
-    background: var(--diabolical-header);
-    color: #ffcccb;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-[data-theme="dark"] .footer {
-    background: var(--diabolical-header);
-    color: #ffcccb;
+/* --- HEADER nuevo --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--card-bg);
+  box-shadow: 0 4px 10px var(--shadow-color);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-[data-theme="dark"] .card {
-    background: var(--diabolical-card);
-    border: 1px solid var(--diabolical-primary);
-    box-shadow: 0 8px 25px rgba(255, 68, 68, 0.2);
+.left-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 }
 
-[data-theme="dark"] .btn-add-cart {
-    background: linear-gradient(135deg, var(--diabolical-primary), var(--diabolical-accent));
-    color: #ffcccb;
+.cotizacion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
 }
 
-[data-theme="dark"] .price-tag {
-    color: var(--diabolical-primary);
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--accent-color);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Estilos comunes */
-.game-card {
-    transition: all 0.3s ease;
-    border-radius: 15px;
+/* ===========================
+   MODAL COMPACTO Y RESPONSIVO
+=========================== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  padding:.15rem;
+  overflow-y: auto;
 }
 
-.game-card:hover {
-    transform: translateY(-5px);
+.modal-content {
+  background-color: var(--card-bg);
+  padding: 1.2rem 1.5rem;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 340px; /* 🔹 Más angosto */
+  box-shadow: 0 4px 12px var(--shadow-color);
+  position: relative;
+  animation: modalIn 0.3s ease;
 }
 
-.game-image {
-    height: 200px;
-    object-fit: cover;
-    border-radius: 15px 15px 0 0;
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.cart-item {
-    border-bottom: 1px solid;
-    padding: 10px 0;
+.close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.3rem;
+  color: var(--accent-color);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.close:hover {
+  transform: scale(1.15);
 }
 
-[data-theme="light"] .cart-item {
-    border-color: #e3f2fd;
+/* ---------------------------
+   FORMULARIO INTERNO
+--------------------------- */
+#form-agregar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-[data-theme="dark"] .cart-item {
-    border-color: #7f0000;
+#form-agregar label {
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-#cartItems {
-    max-height: 300px;
-    overflow-y: auto;
+#form-agregar input,
+#form-agregar textarea {
+  padding: 0.3rem 0.4rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--accent-color);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 0.85rem;
+  transition: border-color 0.2s;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .game-card {
-        margin-bottom: 1rem;
-    }
+#form-agregar input:focus,
+#form-agregar textarea:focus {
+  border-color: var(--btn-bg);
+  outline: none;
+}
+
+#form-agregar textarea {
+  resize: vertical;
+  min-height: 60px;
+  max-height: 160px;
+}
+
+#form-agregar input[type="file"] {
+  background-color: var(--card-bg);
+  border: 1px dashed var(--accent-color);
+  padding: 0.4rem;
+  font-size: 0.8rem;
+}
+
+/* Botón y link JSON */
+#form-agregar .btn {
+  align-self: center;
+  width: 100%;
+  max-width: 180px;
+  margin-top: 0.4rem;
+}
+
+#descargar-json {
+  display: block;
+  text-align: center;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* Responsividad */
+@media (max-width: 480px) {
+  .modal-content {
+    max-width: 90%;
+    padding: 1rem;
+  }
+
+  #form-agregar input,
+  #form-agregar textarea {
+    font-size: 0.8rem;
+  }
+
+  #form-agregar label {
+    font-size: 0.75rem;
+  }
+}
+
+
+
+/* ===========================
+   PRODUCTOS
+=========================== */
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.card {
+  background-color: var(--card-bg);
+  box-shadow: 0 4px 10px var(--shadow-color);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px var(--shadow-color);
+}
+
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.card h3 {
+  margin: 0.5rem 0;
+}
+
+.card p {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.btn {
+  margin-top: 0.5rem;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+/* ===========================
+   CARRITO
+=========================== */
+.carrito {
+  background-color: var(--card-bg);
+  margin: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+#carrito-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#total {
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+/* ===========================
+   FORMULARIO AGREGAR PRODUCTO
+=========================== */
+.agregar-producto {
+  background-color: var(--card-bg);
+  margin: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+input, textarea {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent-color);
+  outline: none;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+textarea {
+  resize: none;
+  height: 80px;
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--card-bg);
+  box-shadow: 0 -4px 10px var(--shadow-color);
+}
+
+/* ===========================
+   UTILIDADES
+=========================== */
+.hidden {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .productos {
+    grid-template-columns: 1fr;
+  }
 }

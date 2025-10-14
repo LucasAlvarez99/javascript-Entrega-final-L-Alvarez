@@ -1,200 +1,144 @@
-// Aplicación principal
-class GameStoreApp {
-    constructor() {
-        this.init();
-    }
+// =============================
+// CORE: main.js
+// =============================
+// Carga productos, obtiene cotización del dólar,
+// controla el tema, la moneda y el modal de productos.
 
-    async init() {
-        try {
-            console.log('🎮 Inicializando GameStore...');
-            
-            // Inicializar módulos
-            await this.initializeModules();
-            
-            // Configurar eventos
-            this.setupEventListeners();
-            
-            // Cargar datos iniciales
-            await this.loadInitialData();
-            
-            console.log('✅ GameStore inicializado correctamente');
-            
-        } catch (error) {
-            console.error('❌ Error inicializando la aplicación:', error);
-            uiRenderer.showError('Error al inicializar la aplicación');
-        }
-    }
+import { obtenerCotizacion } from "../modules/apiService.js";
+import { renderProductos, renderCarrito, vaciarCarrito, toggleMoneda } from "../modules/uiRenderer.js";
+import { initTheme } from "../modules/themeManager.js";
 
-    async initializeModules() {
-        // Los módulos ya se inicializan automáticamente
-        console.log('📦 Módulos inicializados');
-    }
+// Variables globales
+let productos = [];
 
-    setupEventListeners() {
-        // Evento para agregar juegos al carrito
-        document.getElementById('gamesContainer').addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn-add-cart')) {
-                const gameId = parseInt(e.target.dataset.id);
-                this.addToCart(gameId);
-            }
-        });
+// Elementos del DOM
+const productosContainer = document.getElementById("productos");
+const carritoContainer = document.getElementById("carrito-lista");
+const totalElemento = document.getElementById("total");
+const cotizacionTexto = document.getElementById("cotizacion-texto");
+const spinner = document.getElementById("spinner");
+const modal = document.getElementById("modal");
+const abrirForm = document.getElementById("abrirForm");
+const cerrarModal = document.getElementById("cerrarModal");
+const formAgregar = document.getElementById("form-agregar");
 
-        // Evento para agregar nuevo juego
-        document.getElementById('addGameBtn').addEventListener('click', () => {
-            this.showAddGameForm();
-        });
+// =============================
+// INICIALIZACIÓN
+// =============================
+document.addEventListener("DOMContentLoaded", async () => {
+  initTheme(); // activar modo celestial/diabólico
 
-        // Eventos de filtros
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            this.filterGames(e.target.value, document.getElementById('categoryFilter').value);
-        });
+  await cargarCotizacion();
+  await cargarProductos();
 
-        document.getElementById('categoryFilter').addEventListener('change', (e) => {
-            this.filterGames(document.getElementById('searchInput').value, e.target.value);
-        });
+  // Eventos principales
+  document.getElementById("vaciarCarrito").addEventListener("click", vaciarCarrito);
+  document.getElementById("currencyToggle").addEventListener("click", toggleMoneda);
 
-        // Eventos del carrito
-        document.getElementById('clearCart').addEventListener('click', () => {
-            this.clearCart();
-        });
+  // Eventos del modal
+  abrirForm.addEventListener("click", () => modal.classList.remove("hidden"));
+  cerrarModal.addEventListener("click", () => modal.classList.add("hidden"));
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
 
-        document.getElementById('checkoutBtn').addEventListener('click', () => {
-            this.checkout();
-        });
-    }
+  // Evento para agregar producto
+  formAgregar.addEventListener("submit", agregarProducto);
+});
 
-    async loadInitialData() {
-        // Cargar juegos
-        const games = await gameManager.loadGames();
-        uiRenderer.renderGames(games);
-        
-        // Cargar cotización del dólar
-        const rates = await apiService.getDollarRates();
-        apiService.updateDollarDisplay(rates);
-        
-        // Actualizar carrito
-        this.updateCartView();
-    }
+// =============================
+// COTIZACIÓN DEL DÓLAR (HEADER)
+// =============================
+async function cargarCotizacion() {
+  spinner.classList.remove("hidden");
+  const cotizacion = await obtenerCotizacion();
+  spinner.classList.add("hidden");
 
-    addToCart(gameId) {
-        const game = gameManager.getGames().find(g => g.id === gameId);
-        if (game) {
-            cartManager.addItem(game);
-            this.updateCartView();
-            uiRenderer.showMessage(`${game.nombre} agregado al carrito!`);
-        }
-    }
-
-    removeFromCart(gameId) {
-        cartManager.removeItem(gameId);
-        this.updateCartView();
-        uiRenderer.showMessage('Juego removido del carrito', 'info');
-    }
-
-    updateCartQuantity(gameId, quantity) {
-        cartManager.updateQuantity(gameId, quantity);
-        this.updateCartView();
-    }
-
-    clearCart() {
-        cartManager.clearCart();
-        this.updateCartView();
-        uiRenderer.showMessage('Carrito vaciado', 'info');
-    }
-
-    updateCartView() {
-        const items = cartManager.getItems();
-        const total = cartManager.calculateTotal();
-        
-        uiRenderer.renderCart(items);
-        uiRenderer.updateCartTotal(total);
-    }
-
-    filterGames(searchTerm, category) {
-        const filteredGames = gameManager.filterGames(searchTerm, category);
-        uiRenderer.renderGames(filteredGames);
-    }
-
-    async showAddGameForm() {
-        const { value: formData } = await Swal.fire({
-            title: '➕ Agregar Nuevo Juego',
-            html: `
-                <input id="game-name" class="swal2-input" placeholder="Nombre" required>
-                <input id="game-price" class="swal2-input" placeholder="Precio" type="number" step="0.01" required>
-                <select id="game-category" class="swal2-input" required>
-                    <option value="">Categoría</option>
-                    <option value="acción">Acción</option>
-                    <option value="aventura">Aventura</option>
-                    <option value="deportes">Deportes</option>
-                    <option value="estrategia">Estrategia</option>
-                </select>
-                <input id="game-image" class="swal2-input" placeholder="URL de imagen">
-                <textarea id="game-description" class="swal2-textarea" placeholder="Descripción" required></textarea>
-                <input id="game-developer" class="swal2-input" placeholder="Desarrollador" required>
-                <input id="game-year" class="swal2-input" placeholder="Año" type="number" required>
-            `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Agregar',
-            preConfirm: () => {
-                return {
-                    nombre: document.getElementById('game-name').value,
-                    precio: document.getElementById('game-price').value,
-                    categoria: document.getElementById('game-category').value,
-                    imagen: document.getElementById('game-image').value,
-                    descripcion: document.getElementById('game-description').value,
-                    desarrollador: document.getElementById('game-developer').value,
-                    lanzamiento: document.getElementById('game-year').value
-                };
-            }
-        });
-
-        if (formData) {
-            try {
-                const newGame = gameManager.addGame(formData);
-                this.filterGames('', 'all'); // Recargar vista
-                uiRenderer.showMessage(`"${newGame.nombre}" agregado!`);
-            } catch (error) {
-                uiRenderer.showError('Error al agregar el juego');
-            }
-        }
-    }
-
-    async checkout() {
-        const items = cartManager.getItems();
-        if (items.length === 0) {
-            uiRenderer.showError('El carrito está vacío');
-            return;
-        }
-
-        const total = cartManager.calculateTotal();
-        
-        const { value: customerData } = await Swal.fire({
-            title: 'Finalizar Compra',
-            html: `
-                <input class="swal2-input" placeholder="Nombre" value="Cliente Ejemplo">
-                <input class="swal2-input" placeholder="Email" value="cliente@ejemplo.com">
-                <div class="mt-3 p-3 bg-light rounded">
-                    <strong>Total: $${total.toFixed(2)}</strong>
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: 'Confirmar Compra'
-        });
-
-        if (customerData) {
-            cartManager.clearCart();
-            this.updateCartView();
-            
-            Swal.fire({
-                title: '🎉 ¡Compra Exitosa!',
-                text: `Gracias por tu compra de $${total.toFixed(2)}`,
-                icon: 'success',
-                confirmButtonText: 'Continuar'
-            });
-        }
-    }
+  if (cotizacion) {
+    cotizacionTexto.textContent = `💵 Compra: $${cotizacion.compra} | Venta: $${cotizacion.venta}`;
+  } else {
+    cotizacionTexto.textContent = "⚠️ No se pudo obtener la cotización";
+  }
 }
 
-// Inicializar aplicación
-const app = new GameStoreApp();
+// =============================
+// CARGA DE PRODUCTOS
+// =============================
+async function cargarProductos() {
+  try {
+    const response = await fetch("script/data/games.json");
+    const data = await response.json();
+    productos = data;
+    renderProductos(productos, productosContainer);
+    renderCarrito(carritoContainer, totalElemento);
+  } catch (error) {
+    console.error("❌ Error al cargar productos:", error);
+  }
+}
+
+// =============================
+// AGREGAR NUEVO PRODUCTO (MODAL)
+// =============================
+function agregarProducto(e) {
+  e.preventDefault();
+
+  const nombre = document.getElementById("nombre").value.trim();
+  const precioUSD = parseFloat(document.getElementById("precio").value);
+  const categoria = document.getElementById("categoria").value.trim();
+  const imagenInput = document.getElementById("imagen");
+  const descripcion = document.getElementById("descripcion").value.trim();
+  const desarrollador = document.getElementById("desarrollador").value.trim();
+  const lanzamiento = document.getElementById("lanzamiento").value;
+
+  if (!imagenInput.files[0]) {
+    alert("Por favor selecciona una imagen.");
+    return;
+  }
+
+  // Convertir imagen a Base64
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const nuevaImagen = event.target.result;
+
+    const nuevoProducto = {
+      id: productos.length + 1,
+      nombre,
+      precio_usd: precioUSD,
+      categoria,
+      imagen: nuevaImagen,
+      descripcion,
+      desarrollador,
+      lanzamiento
+    };
+
+    productos.push(nuevoProducto);
+    renderProductos(productos, productosContainer);
+
+    // Crear JSON actualizado para descarga
+    const jsonString = JSON.stringify(productos, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.getElementById("descargar-json");
+    link.href = url;
+    link.classList.remove("hidden");
+
+    // Cerrar modal tras guardar
+    modal.classList.add("hidden");
+  };
+
+  reader.readAsDataURL(imagenInput.files[0]);
+
+  // Resetear formulario
+  e.target.reset();
+}
+
+// =============================
+// REFRESCAR COTIZACIÓN AUTOMÁTICAMENTE
+// =============================
+setInterval(async () => {
+  const cotizacion = await obtenerCotizacion();
+  if (cotizacion) {
+    cotizacionTexto.textContent = `💵 Compra: $${cotizacion.compra} | Venta: $${cotizacion.venta}`;
+  }
+}, 5 * 60 * 1000); // cada 5 minutos
