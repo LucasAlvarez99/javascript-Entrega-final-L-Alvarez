@@ -1,53 +1,93 @@
-# 🎮 GameStore - Simulador de Tienda de Videojuegos
+# 🎮 Tienda de Juegos - Proyecto Final
 
-## Descripción
-Simulador interactivo de una tienda online de videojuegos desarrollado en JavaScript vanilla como proyecto final del curso.
+## 📋 Información general
+**Autor:** Lucas Alvarez  
+**Versión:** Entrega Final  
+**Lenguaje:** JavaScript (ES6 Modules)  
+**Fecha:** Octubre 2025  
 
-## Características
-- ✅ Catálogo dinámico de juegos desde JSON
-- ✅ Carrito de compras con persistencia en localStorage
-- ✅ Filtros por categoría y búsqueda
-- ✅ Formulario de compra precargado
-- ✅ Confirmación de compra simulada
-- ✅ Interfaz responsive con Bootstrap
-- ✅ Uso de SweetAlert2 para modales
+Este proyecto representa la **entrega final del curso de JavaScript**.  
+Consiste en una **tienda digital de videojuegos** que incluye:
 
-## Estructura de Archivos
+- Conexión en tiempo real con la **API del dólar oficial**.  
+- Sistema de **modo claro (celestial)** y **modo oscuro (diabólico)**.  
+- Conversión dinámica de precios entre **USD ↔ ARS**.  
+- Carrito de compras funcional.  
+- Formulario emergente (modal) para agregar nuevos productos.  
+- Descarga automática del JSON actualizado con los productos nuevos.
 
-proyecto/
+---
+
+## 🚀 Funcionalidades principales
+
+### 💵 Cotización del dólar
+- Se obtiene desde la API pública:  
+  **[https://api.bluelytics.com.ar/v2/latest](https://api.bluelytics.com.ar/v2/latest)**
+- Muestra en el **header** los valores:
+  - **Compra**
+  - **Venta**
+- Se actualiza cada 5 minutos.
+- Usa el **valor de venta** para la conversión de precios a pesos.
+
+### 🎨 Modo Celestial / Modo Diabólico
+- Modo claro con colores celestes y tonos suaves.  
+- Modo oscuro con rojos intensos y fondo oscuro.  
+- Se guarda la preferencia en `localStorage`.
+
+### 🛒 Carrito de compras
+- Permite agregar y eliminar productos.
+- Calcula el total en ARS o USD según el modo activo.
+- Botón para vaciar el carrito.
+
+### 💰 Cambio de moneda
+- Alterna entre:
+  - 💰 **Pesos Argentinos (ARS)**
+  - 💵 **Dólares (USD)**
+- Conversión en tiempo real usando la cotización oficial.
+
+### ➕ Agregar juego (modal)
+- Formulario modal flotante con los siguientes campos:
+  - Nombre  
+  - Precio (USD)  
+  - Categoría  
+  - Imagen (desde dispositivo)  
+  - Descripción  
+  - Desarrollador  
+  - Fecha de lanzamiento  
+- El juego se agrega dinámicamente a la lista de productos.
+
+### Estructura
+
+javascript-Entrega-final-L-Alvarez/
+│
 ├── index.html
+├── README.md
 ├── styles/
-│ └── style.css
-├── scripts/
-│ ├── main.js
-│ ├── cart.js
-│ ├── ui.js
-│ └── data.json
-└── README.md
+│   └── style.css
+└── script/
+    ├── core/
+    │   └── main.js
+    ├── data/
+    │   └── games.json
+    ├── modules/
+    │   ├── apiService.js
+    │   ├── themeManager.js
+    │   └── uiRenderer.js
 
+#### 📦 Datos de productos
+Los productos se cargan desde un JSON externo:
 
+`script/data/games.json`
 
-## Instalación y Uso
-1. Descargar todos los archivos en una carpeta
-2. Abrir `index.html` en un navegador web
-3. No se requiere servidor - funciona directamente desde el sistema de archivos
-
-## Funcionalidades Principales
-- Agregar/eliminar juegos del carrito
-- Modificar cantidades
-- Vaciar carrito completo
-- Finalizar compra con formulario precargado
-- Persistencia de datos en localStorage
-
-## Tecnologías Utilizadas
-- HTML5, CSS3, JavaScript ES6+
-- Bootstrap 5.3.0
-- SweetAlert2
-- LocalStorage API
-- Fetch API
-
-## Notas para el Corrector
-- Los datos de formulario vienen precargados para facilitar las pruebas
-- El carrito se guarda automáticamente en localStorage
-- No se requiere registro/login
-- Todas las funcionalidades están simuladas (no hay backend real)
+Estructura del JSON:
+```json
+{
+  "id": 1,
+  "nombre": "Nebula Racer",
+  "precio_usd": 39.99,
+  "categoria": "Carreras",
+  "imagen": "assets/nebula_racer.jpg",
+  "descripcion": "Carreras intergalácticas con físicas avanzadas y pistas dinámicas.",
+  "desarrollador": "LunarForge Studios",
+  "lanzamiento": "2025-03-15"
+}
