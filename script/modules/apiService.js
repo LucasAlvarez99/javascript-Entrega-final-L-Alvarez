@@ -1,36 +1,38 @@
+// apiService.js
+// Maneja la obtención de cotización (compra/venta) y conversión USD -> ARS
 let cotizacionDolar = { compra: null, venta: null };
 
-// --- Obtener cotización del dólar ---
 export async function obtenerCotizacion() {
   try {
-    const response = await fetch("https://api.bluelytics.com.ar/v2/latest");
-    const data = await response.json();
+    const res = await fetch('https://api.bluelytics.com.ar/v2/latest');
+    const data = await res.json();
 
-    const oficial = data.oficial;
-    const compra = oficial.value_buy;
-    const venta = oficial.value_sell;
+    const oficial = data.oficial || data.oficial_euro || null;
+    const compra = oficial?.value_buy ?? oficial?.compra ?? null;
+    const venta = oficial?.value_sell ?? oficial?.venta ?? null;
 
     if (compra && venta) {
       cotizacionDolar = { compra, venta };
-      console.log(`💵 Dólar oficial → Compra: $${compra} | Venta: $${venta}`);
       return cotizacionDolar;
     } else {
       return null;
     }
-  } catch {
+  } catch (err) {
+    console.error('Error cotización', err);
     return null;
   }
 }
 
-// --- Conversión: usar valor de venta ---
+// Convertir usando valor de venta (requisito)
 export function convertirPrecio(precioUSD) {
-  if (!cotizacionDolar.venta)
-    return `${precioUSD.toFixed(2)} USD`;
+  if (!cotizacionDolar.venta) return `${precioUSD.toFixed(2)} USD`;
   const precioARS = precioUSD * cotizacionDolar.venta;
-  return `$${precioARS.toLocaleString("es-AR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })} ARS`;
+  return `$${precioARS.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS`;
+}
+
+export function convertirPrecioNumber(precioUSD) {
+  if (!cotizacionDolar.venta) return null;
+  return precioUSD * cotizacionDolar.venta;
 }
 
 export function getCotizacionActual() {

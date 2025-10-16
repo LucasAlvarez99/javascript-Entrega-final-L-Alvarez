@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tienda de Juegos - Lucas Álvarez</title>
+  <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="left-header">
+      <h1 class="titulo">🎮 Tienda de Juegos</h1>
+      <div id="cotizacion" class="cotizacion">
+        <span id="cotizacion-texto">💵 Cargando cotización...</span>
+        <div class="spinner hidden" id="spinner"></div>
+      </div>
+    </div>
+
+    <div class="right-header">
+      <div id="user-area" class="user-area"></div>
+      <button id="themeToggle" class="btn-header">😇 Modo Celestial</button>
+      <button id="currencyToggle" class="btn-header">💰 ARS</button>
+      <button id="cartButton" class="btn-cart" aria-label="Carrito">
+        🛒 <span id="cartCount" class="cart-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="productos" class="productos"></section>
+  </main>
+
+  <!-- PANEL DE CARRITO -->
+  <aside id="cartPanel" class="cart-panel hidden" aria-hidden="true">
+    <div class="cart-panel-header">
+      <h3>🛒 Tu carrito</h3>
+      <button id="closeCart" class="close-panel">✖</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-panel-footer">
+      <p id="cartTotal">Total: $0</p>
+      <div class="cart-actions">
+        <button id="emptyCart" class="btn small">Vaciar carrito</button>
+        <button id="confirmPurchase" class="btn small primary">Confirmar compra</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MODAL DE COMPRA EN PASOS -->
+  <div id="purchaseModal" class="modal hidden">
+    <div class="modal-content">
+      <span id="closePurchase" class="close">&times;</span>
+      <h2 id="stepTitle">Finalizar Compra</h2>
+      <form id="purchaseForm">
+
+        <!-- PASO 1: DATOS DE CONTACTO -->
+        <div id="step1" class="step active">
+          <h3>Datos de Contacto</h3>
+          <label>Nombre Completo *</label>
+          <input type="text" id="contactName" required>
+          <label>Teléfono *</label>
+          <input type="tel" id="contactPhone" required>
+          <label>Email *</label>
+          <input type="email" id="contactEmail" required>
+          <div class="actions">
+            <button type="button" id="nextToStep2" class="btn primary">Continuar</button>
+          </div>
+        </div>
+
+        <!-- PASO 2: MÉTODO DE PAGO -->
+        <div id="step2" class="step hidden">
+          <h3>Método de Pago</h3>
+          <label><input type="radio" name="metodo" value="efectivo" checked> Efectivo</label>
+          <label><input type="radio" name="metodo" value="tarjeta"> Tarjeta</label>
+          <div class="actions">
+            <button type="button" id="backToStep1" class="btn">Volver</button>
+            <button type="button" id="nextToStep3" class="btn primary">Continuar</button>
+          </div>
+        </div>
+
+        <!-- PASO 3: DATOS DE TARJETA -->
+        <div id="step3" class="step hidden">
+          <h3>Datos de Tarjeta</h3>
+          <label>Número de tarjeta</label>
+          <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456">
+          <label>Nombre en la tarjeta</label>
+          <input type="text" id="cardName">
+          <label>Vencimiento (MM/AA)</label>
+          <input type="text" id="cardExpiry" maxlength="5" placeholder="05/27">
+          <label>CVV</label>
+          <input type="text" id="cardCVV" maxlength="4">
+          <label>Tipo</label>
+          <select id="cardType">
+            <option value="debito">Débito</option>
+            <option value="credito">Crédito</option>
+          </select>
+          <div class="actions">
+            <button type="button" id="backToStep2" class="btn">Volver</button>
+            <button type="submit" id="finalizePurchase" class="btn primary">Finalizar compra</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- POP-UP -->
+  <div id="popupMsg" class="popup-msg hidden">✅ ¡Gracias por su compra!</div>
+
+  <footer class="footer">
+    <p>Proyecto Final - Lucas Álvarez</p>
+  </footer>
+
+  <script type="module" src="script/core/main.js"></script>
+</body>
+</html>

@@ -1,33 +1,24 @@
-// =============================
-// MÓDULO: themeManager.js
-// =============================
-// Controla el modo claro (celestial) y oscuro (diabólico)
-// Guarda la preferencia del usuario en localStorage
-
+// themeManager.js
 export function initTheme() {
-  const body = document.body;
-  const themeToggle = document.getElementById("themeToggle");
+  const saved = localStorage.getItem('theme') || 'light';
+  applyTheme(saved);
 
-  // Cargar el tema guardado
-  const savedTheme = localStorage.getItem("theme") || "light";
-  applyTheme(savedTheme);
-
-  themeToggle.addEventListener("click", () => {
-    const currentTheme = body.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    applyTheme(currentTheme);
-    localStorage.setItem("theme", currentTheme);
+  const btn = document.getElementById('themeToggle');
+  btn && btn.addEventListener('click', () => {
+    const current = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(current);
+    localStorage.setItem('theme', current);
   });
 }
 
 function applyTheme(theme) {
-  const body = document.body;
-  const themeToggle = document.getElementById("themeToggle");
-
-  if (theme === "dark") {
-    body.setAttribute("data-theme", "dark");
-    themeToggle.textContent = "😈 Modo Diabólico";
+  if (theme === 'dark') {
+    document.body.setAttribute('data-theme', 'dark');
+    const t = document.getElementById('themeToggle');
+    if (t) t.textContent = '😈 Modo Diabólico';
   } else {
-    body.setAttribute("data-theme", "light");
-    themeToggle.textContent = "😇 Modo Celestial";
+    document.body.setAttribute('data-theme', 'light');
+    const t = document.getElementById('themeToggle');
+    if (t) t.textContent = '😇 Modo Celestial';
   }
 }

@@ -1,110 +1,171 @@
-// =============================
-// MÓDULO: uiRenderer.js
-// =============================
-// Renderiza productos, carrito y gestiona la visualización de precios
-// usando la cotización del dólar oficial.
+// uiRenderer.js
+import { convertirPrecio, convertirPrecioNumber } from './apiService.js';
 
-// Importamos la función de conversión
-import { convertirPrecio } from "./apiService.js";
-
-let carrito = [];
 let productos = [];
+let carrito = []; // array de items {id, nombre, precio_usd, cantidad, imagen}
 let mostrarEnPesos = true;
 
-// --- Renderizado de productos ---
-export function renderProductos(lista, contenedor) {
-  productos = lista;
-  contenedor.innerHTML = "";
+export function setProductos(list) {
+  productos = list;
+}
 
-  lista.forEach((producto) => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-
+export function renderProductos(container) {
+  container.innerHTML = '';
+  productos.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card';
     card.innerHTML = `
-      <img src="${producto.imagen}" alt="${producto.nombre}">
-      <h3>${producto.nombre}</h3>
-      <p>${producto.descripcion}</p>
-      <p><strong>Desarrollador:</strong> ${producto.desarrollador}</p>
-      <p><strong>Lanzamiento:</strong> ${producto.lanzamiento}</p>
-      <p><strong>Precio:</strong> ${mostrarEnPesos ? convertirPrecio(producto.precio_usd) : `${producto.precio_usd.toFixed(2)} USD`}</p>
-      <button class="btn agregar-carrito" data-id="${producto.id}">Agregar al carrito</button>
+      <img src="${p.imagen}" alt="${p.nombre}" />
+      <h3>${p.nombre}</h3>
+      <p class="meta">${p.categoria} • ${p.desarrollador}</p>
+      <p>${p.descripcion}</p>
+      <p><strong>${mostrarEnPesos ? convertirPrecio(p.precio_usd) : p.precio_usd.toFixed(2) + ' USD'}</strong></p>
+      <div style="display:flex;gap:.5rem;width:100%;justify-content:center">
+        <button class="btn add-btn" data-id="${p.id}">Agregar</button>
+      </div>
     `;
-
-    contenedor.appendChild(card);
+    container.appendChild(card);
   });
 
-  // Asignar evento a los botones "Agregar al carrito"
-  const botones = document.querySelectorAll(".agregar-carrito");
-  botones.forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const id = parseInt(e.target.dataset.id);
-      const producto = productos.find((p) => p.id === id);
-      agregarAlCarrito(producto);
+  // listeners
+  container.querySelectorAll('.add-btn').forEach(b => {
+    b.addEventListener('click', (e) => {
+      const id = Number(e.currentTarget.dataset.id);
+      const prod = productos.find(x => x.id === id);
+      if (prod) agregarAlCarrito(prod);
     });
   });
+
+  updateCartCountUI();
 }
 
-// --- Renderizado del carrito ---
-export function renderCarrito(contenedor, totalElemento) {
-  contenedor.innerHTML = "";
+function findInCart(id) {
+  return carrito.find(i => i.id === id);
+}
 
-  if (carrito.length === 0) {
-    contenedor.innerHTML = "<p>El carrito está vacío</p>";
-    totalElemento.textContent = "";
-    return;
+export function agregarAlCarrito(producto) {
+  const existente = findInCart(producto.id);
+  if (existente) {
+    existente.cantidad += 1;
+  } else {
+    carrito.push({
+      id: producto.id,
+      nombre: producto.nombre,
+      precio_usd: producto.precio_usd,
+      cantidad: 1,
+      imagen: producto.imagen
+    });
   }
-
-  carrito.forEach((item) => {
-    const div = document.createElement("div");
-    div.classList.add("item-carrito");
-    div.innerHTML = `
-      <p>${item.nombre} - ${mostrarEnPesos ? convertirPrecio(item.precio_usd) : `${item.precio_usd.toFixed(2)} USD`}
-      <button class="btn btn-eliminar" data-id="${item.id}">❌</button></p>
-    `;
-    contenedor.appendChild(div);
-  });
-
-  const total = carrito.reduce((acc, item) => acc + item.precio_usd, 0);
-  const totalConvertido = mostrarEnPesos ? convertirPrecio(total) : `${total.toFixed(2)} USD`;
-  totalElemento.textContent = `Total: ${totalConvertido}`;
-
-  // Eventos eliminar del carrito
-  const botonesEliminar = document.querySelectorAll(".btn-eliminar");
-  botonesEliminar.forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const id = parseInt(e.target.dataset.id);
-      carrito = carrito.filter((p) => p.id !== id);
-      renderCarrito(contenedor, totalElemento);
-    });
-  });
+  updateCartCountUI();
+  renderCartItems();
 }
 
-// --- Controladores ---
-function agregarAlCarrito(producto) {
-  carrito.push(producto);
-  const contenedor = document.getElementById("carrito-lista");
-  const total = document.getElementById("total");
-  renderCarrito(contenedor, total);
+export function removeFromCart(id) {
+  carrito = carrito.filter(i => i.id !== id);
+  updateCartCountUI();
+  renderCartItems();
 }
 
 export function vaciarCarrito() {
   carrito = [];
-  const contenedor = document.getElementById("carrito-lista");
-  const total = document.getElementById("total");
-  renderCarrito(contenedor, total);
+  updateCartCountUI();
+  renderCartItems();
 }
 
-// --- Cambiar visualización de moneda ---
-export function toggleMoneda() {
+export function getCart() {
+  return carrito;
+}
+
+export function getCartTotalNumber() {
+  const totalUSD = carrito.reduce((sum, it) => sum + it.precio_usd * it.cantidad, 0);
+  const totalARS = convertirPrecioNumber(totalUSD);
+  return { totalUSD, totalARS };
+}
+
+export function toggleCurrency() {
   mostrarEnPesos = !mostrarEnPesos;
-  const currencyBtn = document.getElementById("currencyToggle");
-  currencyBtn.textContent = mostrarEnPesos ? "💰 ARS" : "💵 USD";
+  const btn = document.getElementById('currencyToggle');
+  if (btn) btn.textContent = mostrarEnPesos ? '💰 ARS' : '💵 USD';
+  renderProductos(document.getElementById('productos'));
+  renderCartItems();
+}
 
-  // Re-renderizar productos y carrito
-  const contenedor = document.getElementById("productos");
-  const carritoCont = document.getElementById("carrito-lista");
-  const total = document.getElementById("total");
+export function initCartUI() {
+  document.getElementById('cartButton').addEventListener('click', () => {
+    const panel = document.getElementById('cartPanel');
+    panel.classList.toggle('hidden');
+  });
+  document.getElementById('closeCart').addEventListener('click', () => {
+    document.getElementById('cartPanel').classList.add('hidden');
+  });
 
-  renderProductos(productos, contenedor);
-  renderCarrito(carritoCont, total);
+  document.getElementById('emptyCart').addEventListener('click', vaciarCarrito);
+  document.getElementById('confirmPurchase').addEventListener('click', () => {
+    // abrir modal de compra
+    document.getElementById('purchaseModal').classList.remove('hidden');
+  });
+}
+
+function updateCartCountUI() {
+  const countEl = document.getElementById('cartCount');
+  const totalItems = carrito.reduce((s, it) => s + it.cantidad, 0);
+  countEl && (countEl.textContent = totalItems);
+  // update side panel list
+  renderCartItems();
+}
+
+export function renderCartItems() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  if (!container || !totalEl) return;
+
+  container.innerHTML = '';
+  if (carrito.length === 0) {
+    container.innerHTML = '<p>El carrito está vacío.</p>';
+    totalEl.textContent = 'Total: $0';
+    return;
+  }
+
+  carrito.forEach(it => {
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    const precioDisplay = mostrarEnPesos ? convertirPrecio(it.precio_usd) : `${it.precio_usd.toFixed(2)} USD`;
+    div.innerHTML = `
+      <div style="flex:1">
+        <strong>${it.nombre}</strong>
+        <div class="meta">${precioDisplay} × ${it.cantidad}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.3rem;align-items:flex-end">
+        <button class="btn small inc" data-id="${it.id}">+</button>
+        <button class="btn small remove" data-id="${it.id}">-</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // attach inc/dec
+  container.querySelectorAll('.inc').forEach(b => {
+    b.addEventListener('click', (e) => {
+      const id = Number(e.currentTarget.dataset.id);
+      const item = carrito.find(x => x.id === id);
+      if (item) { item.cantidad += 1; updateCartCountUI(); }
+    });
+  });
+  container.querySelectorAll('.remove').forEach(b => {
+    b.addEventListener('click', (e) => {
+      const id = Number(e.currentTarget.dataset.id);
+      const item = carrito.find(x => x.id === id);
+      if (!item) return;
+      item.cantidad -= 1;
+      if (item.cantidad <= 0) {
+        removeFromCart(id);
+      } else {
+        updateCartCountUI();
+      }
+    });
+  });
+
+  const totals = getCartTotalNumber();
+  if (totals.totalARS !== null) totalEl.textContent = `Total: $${totals.totalARS.toLocaleString('es-AR', {minimumFractionDigits:2,maximumFractionDigits:2})} ARS`;
+  else totalEl.textContent = `Total: ${totals.totalUSD.toFixed(2)} USD`;
 }

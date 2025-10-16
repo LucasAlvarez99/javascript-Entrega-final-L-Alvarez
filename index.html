@@ -3,73 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tienda de Juegos - L. Alvarez</title>
+  <title>Iniciar Sesión - Tienda de Juegos</title>
   <link rel="stylesheet" href="styles/style.css" />
 </head>
-<body>
-  <header class="header">
-    <div class="left-header">
-      <h1 class="titulo">🎮 Tienda de Juegos</h1>
-      <div id="cotizacion" class="cotizacion">
-        <span id="cotizacion-texto">💵 Cargando cotización...</span>
-        <div class="spinner hidden" id="spinner"></div>
-      </div>
-    </div>
-
-    <div class="right-header">
-      <button id="themeToggle" class="btn-header">😇 Modo Celestial</button>
-      <button id="currencyToggle" class="btn-header">💰 ARS</button>
-      <button id="abrirForm" class="btn-header">➕ Agregar Juego</button>
-    </div>
-  </header>
-
-  <main>
-    <section id="productos" class="productos"></section>
-
-    <section id="carrito" class="carrito">
-      <h2>🛒 Carrito</h2>
-      <div id="carrito-lista"></div>
-      <p id="total"></p>
-      <button id="vaciarCarrito" class="btn">Vaciar carrito</button>
-    </section>
-  </main>
-
-  <!-- Modal para agregar producto -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="cerrarModal" class="close">&times;</span>
-      <h2>➕ Agregar Juego</h2>
-      <form id="form-agregar">
-        <label>Nombre:</label>
-        <input type="text" id="nombre" required />
-
-        <label>Precio (USD):</label>
-        <input type="number" id="precio" step="0.01" required />
-
-        <label>Categoría:</label>
-        <input type="text" id="categoria" required />
-
-        <label>Imagen:</label>
-        <input type="file" id="imagen" accept="image/*" required />
-
-        <label>Descripción:</label>
-        <textarea id="descripcion" required></textarea>
-
-        <label>Desarrollador:</label>
-        <input type="text" id="desarrollador" required />
-
-        <label>Fecha de lanzamiento:</label>
-        <input type="date" id="lanzamiento" required />
-
-        <button type="submit" class="btn">Guardar</button>
-      </form>
-    </div>
+<body class="login-body">
+  <div class="theme-toggle-container">
+    <button id="themeToggle" class="theme-toggle">😇 / 😈</button>
   </div>
 
+  <main class="login-container">
+    <div class="login-card">
+      <h1>🎮 Tienda de Juegos</h1>
+      <p class="subtitle">Iniciá sesión para continuar</p>
+
+      <form id="loginForm" class="form">
+        <label>Usuario</label>
+        <input type="text" id="username" placeholder="Ingresá tu usuario" required />
+
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="Ingresá tu contraseña" required />
+
+        <button type="submit" class="btn primary full">Ingresar</button>
+      </form>
+
+      <div class="login-links">
+        <p>¿No tenés cuenta? <a href="pages/register.html">Registrate</a></p>
+      </div>
+
+      <div class="user-list">
+        <h3>👥 Usuarios disponibles</h3>
+        <ul id="userList"></ul>
+      </div>
+    </div>
+  </main>
+
   <footer class="footer">
-    <p>Proyecto Final - Lucas Alvarez</p>
+    <p>Proyecto Final - Lucas Álvarez</p>
   </footer>
 
-  <script type="module" src="script/core/main.js"></script>
+  <script type="module" src="script/modules/login.js"></script>
 </body>
 </html>

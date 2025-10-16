@@ -1,336 +1,477 @@
-/* ===========================
-   ESTILOS BASE
-=========================== */
+/* ===========================================
+   🌗 Tema base: Celestial (claro) / Diabólico (oscuro)
+=========================================== */
 :root {
-  --bg-color: #e6f4ff;
-  --text-color: #0d1b2a;
-  --card-bg: #ffffff;
-  --accent-color: #2b7fff;
-  --btn-bg: #2b7fff;
-  --btn-text: #ffffff;
-  --shadow-color: rgba(0, 0, 0, 0.15);
+  --bg: #f7f9fc;
+  --text: #1a1a1a;
+  --card: #ffffff;
+  --accent: #0095ff;
+  --accent-light: #aee1ff;
+  --border: #e0e0e0;
+  --shadow: rgba(0, 0, 0, 0.15);
+  --btn-hover: #007bff;
 }
 
-[data-theme="dark"] {
-  --bg-color: #0a0a0a;
-  --text-color: #ff4444;
-  --card-bg: #1a0000;
-  --accent-color: #ff0000;
-  --btn-bg: #990000;
-  --btn-text: #ffffff;
-  --shadow-color: rgba(255, 0, 0, 0.2);
+body.dark {
+  --bg: #0e0e0e;
+  --text: #f7f7f7;
+  --card: #181818;
+  --accent: #ff3333;
+  --accent-light: #ffaaaa;
+  --border: #222;
+  --shadow: rgba(255, 0, 0, 0.3);
+  --btn-hover: #ff4d4d;
 }
 
+/* Transiciones de tema */
 body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Poppins", sans-serif;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
+  transition: background 0.5s, color 0.5s;
 }
 
-/* --- HEADER nuevo --- */
+/* ===========================================
+   🔘 Botones y elementos generales
+=========================================== */
+button, .btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 8px var(--accent-light);
+}
+
+.btn.primary:hover {
+  background: var(--btn-hover);
+  transform: scale(1.05);
+}
+
+.btn.small {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.full {
+  width: 100%;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ===========================================
+   🌤 Header
+=========================================== */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--card);
   padding: 1rem 2rem;
-  background-color: var(--card-bg);
-  box-shadow: 0 4px 10px var(--shadow-color);
-  flex-wrap: wrap;
-  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
-.left-header {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
+.titulo {
+  font-size: 1.5rem;
 }
 
 .cotizacion {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: bold;
+  font-size: 0.9rem;
+  margin-top: 4px;
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
-  border: 3px solid var(--accent-color);
-  border-top-color: transparent;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--accent-light);
+  border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 1s linear infinite;
 }
+.hidden { display: none; }
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* ===========================
-   MODAL COMPACTO Y RESPONSIVO
-=========================== */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
+/* ===========================================
+   🪙 Botones de cabecera
+=========================================== */
+.btn-header {
+  background: var(--accent);
+  color: #fff;
+  margin-left: 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+.btn-header:hover {
+  background: var(--btn-hover);
+}
+
+/* ===========================================
+   💫 Login / Registro
+=========================================== */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(160deg, var(--accent-light), var(--bg));
+  transition: all 0.5s ease;
+}
+
+.login-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 100;
-  padding:.15rem;
-  overflow-y: auto;
-}
-
-.modal-content {
-  background-color: var(--card-bg);
-  padding: 1.2rem 1.5rem;
-  border-radius: 14px;
   width: 100%;
-  max-width: 340px; /* 🔹 Más angosto */
-  box-shadow: 0 4px 12px var(--shadow-color);
-  position: relative;
-  animation: modalIn 0.3s ease;
+  max-width: 420px;
 }
 
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.close {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  font-size: 1.3rem;
-  color: var(--accent-color);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-.close:hover {
-  transform: scale(1.15);
-}
-
-/* ---------------------------
-   FORMULARIO INTERNO
---------------------------- */
-#form-agregar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-#form-agregar label {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-#form-agregar input,
-#form-agregar textarea {
-  padding: 0.3rem 0.4rem;
-  border-radius: 6px;
-  border: 1.5px solid var(--accent-color);
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-size: 0.85rem;
-  transition: border-color 0.2s;
-}
-
-#form-agregar input:focus,
-#form-agregar textarea:focus {
-  border-color: var(--btn-bg);
-  outline: none;
-}
-
-#form-agregar textarea {
-  resize: vertical;
-  min-height: 60px;
-  max-height: 160px;
-}
-
-#form-agregar input[type="file"] {
-  background-color: var(--card-bg);
-  border: 1px dashed var(--accent-color);
-  padding: 0.4rem;
-  font-size: 0.8rem;
-}
-
-/* Botón y link JSON */
-#form-agregar .btn {
-  align-self: center;
+.login-card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px var(--shadow);
   width: 100%;
-  max-width: 180px;
-  margin-top: 0.4rem;
-}
-
-#descargar-json {
-  display: block;
   text-align: center;
-  margin-top: 0.6rem;
-  font-size: 0.85rem;
+  animation: pop 0.6s ease;
 }
 
-/* Responsividad */
-@media (max-width: 480px) {
-  .modal-content {
-    max-width: 90%;
-    padding: 1rem;
-  }
-
-  #form-agregar input,
-  #form-agregar textarea {
-    font-size: 0.8rem;
-  }
-
-  #form-agregar label {
-    font-size: 0.75rem;
-  }
+@keyframes pop {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
+.form input, .form select {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
 
+.subtitle {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
 
-/* ===========================
-   PRODUCTOS
-=========================== */
-.productos {
+.user-list {
+  margin-top: 1rem;
+  text-align: left;
+}
+.user-list ul {
+  list-style: none;
+  padding: 0;
+}
+.user-list li {
+  background: var(--accent-light);
+  margin-bottom: 6px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* ===========================================
+   🛍 Tienda (Home)
+=========================================== */
+.main {
+  padding: 2rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
+  gap: 1.2rem;
 }
 
-.card {
-  background-color: var(--card-bg);
-  box-shadow: 0 4px 10px var(--shadow-color);
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.3s;
+.productos .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px var(--shadow-color);
+.productos .card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 25px var(--accent-light);
 }
 
 .card img {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 10px;
 }
 
-.card h3 {
-  margin: 0.5rem 0;
-}
-
-.card p {
-  font-size: 0.9rem;
-  color: var(--text-color);
-}
-
-.btn {
-  margin-top: 0.5rem;
-  background-color: var(--btn-bg);
-  color: var(--btn-text);
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.btn:hover {
-  background-color: var(--accent-color);
-  transform: scale(1.05);
-}
-
-/* ===========================
-   CARRITO
-=========================== */
-.carrito {
-  background-color: var(--card-bg);
-  margin: 2rem;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px var(--shadow-color);
-}
-
-#carrito-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-#total {
-  font-weight: bold;
-  margin-top: 1rem;
-}
-
-/* ===========================
-   FORMULARIO AGREGAR PRODUCTO
-=========================== */
-.agregar-producto {
-  background-color: var(--card-bg);
-  margin: 2rem;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px var(--shadow-color);
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-input, textarea {
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--accent-color);
-  outline: none;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-}
-
-textarea {
-  resize: none;
-  height: 80px;
-}
-
-/* ===========================
-   FOOTER
-=========================== */
-.footer {
-  text-align: center;
+.card .info {
   padding: 1rem;
-  background-color: var(--card-bg);
-  box-shadow: 0 -4px 10px var(--shadow-color);
+}
+.card .info h3 {
+  margin: 0.2rem 0;
+}
+.card .info p {
+  font-size: 0.9rem;
+  opacity: 0.9;
 }
 
-/* ===========================
-   UTILIDADES
-=========================== */
-.hidden {
+/* ===========================================
+   🛒 Carrito
+=========================================== */
+.cart-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 340px;
+  height: 100%;
+  background: var(--card);
+  box-shadow: -4px 0 16px var(--shadow);
+  transform: translateX(100%);
+  transition: transform 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cart-panel.show {
+  transform: translateX(0);
+}
+
+.cart-panel-header, .cart-panel-footer {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-items {
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ===========================================
+   💳 Modal de compra (3 pasos)
+=========================================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal.hidden {
   display: none;
 }
 
+.modal-content {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px var(--shadow);
+  width: 90%;
+  max-width: 420px;
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.form-step {
+  display: none;
+}
+.form-step.active {
+  display: block;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+/* ===========================================
+   🍰 Toast (mensaje final)
+=========================================== */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: var(--accent);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px var(--shadow);
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 150;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ===========================================
+   ⚙️ Footer
+=========================================== */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+/* ===========================================
+   📱 Responsividad
+=========================================== */
 @media (max-width: 600px) {
-  .productos {
-    grid-template-columns: 1fr;
+  .header {
+    flex-direction: column;
+    gap: 1rem;
   }
+  .cart-panel {
+    width: 100%;
+  }
+}
+
+:root {
+  --bg: #f6f8fa;
+  --text-color: #111;
+  --card-bg: #fff;
+  --accent: #007bff;
+  --shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* 🔥 modo oscuro */
+body.dark {
+  --bg: #0c0b0c;
+  --text-color: #f0f0f0;
+  --card-bg: #1a1a1a;
+  --accent: #ff1c1c;
+  --shadow: rgba(255, 0, 0, 0.25);
+}
+
+/* generales */
+body {
+  background: var(--bg);
+  color: var(--text-color);
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+.header, .footer {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn, .btn-header {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn:hover, .btn-header:hover { opacity: 0.85; }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal.hidden { display: none; }
+
+.modal-content {
+  background: var(--card-bg);
+  color: var(--text-color);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px var(--shadow);
+  width: 90%;
+  max-width: 480px;
+  position: relative;
+  animation: fadeIn 0.3s ease;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+h2, h3 { margin-top: 0; }
+
+.step.hidden { display: none; }
+.step.active { display: block; animation: fadeIn 0.4s ease; }
+
+input, select {
+  width: 100%;
+  padding: 0.6rem;
+  margin: 0.4rem 0 1rem 0;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-color);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* popup visual */
+.popup-msg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: var(--card-bg);
+  border: 2px solid var(--accent);
+  color: var(--text-color);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--shadow);
+  opacity: 0;
+  z-index: 2000;
+  transition: all 0.4s ease;
+  font-weight: bold;
+  text-align: center;
+}
+.popup-msg.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }
