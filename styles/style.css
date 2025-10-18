@@ -318,3 +318,27 @@ button, input {
 .shake {
   animation: shake 0.4s ease;
 }
+
+
+/* =======================
+   Toast Notification
+   ======================= */
+.toast-msg {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--color-primary);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 1050;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.toast-msg.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
