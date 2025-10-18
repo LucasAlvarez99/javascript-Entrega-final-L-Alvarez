@@ -1,477 +1,320 @@
-/* ===========================================
-   🌗 Tema base: Celestial (claro) / Diabólico (oscuro)
-=========================================== */
+/* ===============================================
+   ESTILOS GLOBALES - Proyecto Final L. Álvarez
+   =============================================== */
+
+/* Tipografía y variables */
 :root {
-  --bg: #f7f9fc;
-  --text: #1a1a1a;
-  --card: #ffffff;
-  --accent: #0095ff;
-  --accent-light: #aee1ff;
-  --border: #e0e0e0;
-  --shadow: rgba(0, 0, 0, 0.15);
-  --btn-hover: #007bff;
+  --primary-color: #1b4b8a;
+  --primary-hover: #2563eb;
+  --secondary-color: #0d1117;
+  --text-color: #f5f5f5;
+  --bg-color: #f9fafb;
+  --border-color: #ddd;
+  --error-color: #ff4d4d;
+  --success-color: #22c55e;
+  --radius: 10px;
+  --transition: 0.3s ease;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-body.dark {
-  --bg: #0e0e0e;
-  --text: #f7f7f7;
-  --card: #181818;
-  --accent: #ff3333;
-  --accent-light: #ffaaaa;
-  --border: #222;
-  --shadow: rgba(255, 0, 0, 0.3);
-  --btn-hover: #ff4d4d;
-}
-
-/* Transiciones de tema */
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Poppins", sans-serif;
+html, body {
   margin: 0;
-  transition: background 0.5s, color 0.5s;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg-color);
+  color: #222;
+  scroll-behavior: smooth;
 }
 
-/* ===========================================
-   🔘 Botones y elementos generales
-=========================================== */
-button, .btn {
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+.container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.btn.primary {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 0 8px var(--accent-light);
+/* ===============================================
+   HEADER
+   =============================================== */
+.site-header {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 1rem 0;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.btn.primary:hover {
-  background: var(--btn-hover);
-  transform: scale(1.05);
-}
-
-.btn.small {
-  font-size: 0.85rem;
-  padding: 0.4rem 0.8rem;
-}
-
-.full {
-  width: 100%;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-
-/* ===========================================
-   🌤 Header
-=========================================== */
-.header {
+.header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--card);
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 10px var(--shadow);
 }
 
-.titulo {
-  font-size: 1.5rem;
+.logo {
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
 }
 
-.cotizacion {
+.nav-links a {
+  color: var(--text-color);
+  text-decoration: none;
+  margin: 0 0.8rem;
+  transition: var(--transition);
+  font-weight: 400;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--primary-color);
+}
+
+/* ===============================================
+   FOOTER
+   =============================================== */
+.site-footer {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: 3rem;
+}
+
+.site-footer p {
+  margin: 0.2rem 0;
   font-size: 0.9rem;
-  margin-top: 4px;
+  opacity: 0.85;
 }
 
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--accent-light);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-.hidden { display: none; }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ===========================================
-   🪙 Botones de cabecera
-=========================================== */
-.btn-header {
-  background: var(--accent);
-  color: #fff;
-  margin-left: 8px;
-  border-radius: 6px;
-  font-weight: 700;
-}
-.btn-header:hover {
-  background: var(--btn-hover);
-}
-
-/* ===========================================
-   💫 Login / Registro
-=========================================== */
-.login-body {
+/* ===============================================
+   MAIN - Layout general
+   =============================================== */
+.main-content {
+  min-height: 80vh;
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(160deg, var(--accent-light), var(--bg));
-  transition: all 0.5s ease;
+  padding: 2rem 0;
 }
 
-.login-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+/* ===============================================
+   FORMULARIOS (Login / Register)
+   =============================================== */
+.login-section,
+.register-section {
+  background-color: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   max-width: 420px;
-}
-
-.login-card {
-  background: var(--card);
-  padding: 2rem;
-  border-radius: 18px;
-  box-shadow: 0 8px 30px var(--shadow);
   width: 100%;
   text-align: center;
-  animation: pop 0.6s ease;
 }
 
-@keyframes pop {
-  from { transform: translateY(50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.form input, .form select {
-  width: 100%;
-  padding: 0.7rem;
+.login-section h1,
+.register-section h1 {
   margin-bottom: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
+  color: var(--primary-color);
 }
 
-.subtitle {
-  color: var(--accent);
+.login-section p,
+.register-section p {
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.form-group {
   margin-bottom: 1rem;
-}
-
-.user-list {
-  margin-top: 1rem;
   text-align: left;
 }
-.user-list ul {
-  list-style: none;
-  padding: 0;
-}
-.user-list li {
-  background: var(--accent-light);
-  margin-bottom: 6px;
-  padding: 0.4rem 0.6rem;
-  border-radius: 6px;
+
+label {
+  display: block;
   font-weight: 500;
+  margin-bottom: 0.3rem;
+  color: #333;
 }
 
-/* ===========================================
-   🛍 Tienda (Home)
-=========================================== */
-.main {
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.btn-login {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.btn-login:hover {
+  background-color: var(--primary-hover);
+}
+
+.login-error {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--error-color);
+}
+
+/* ===============================================
+   HOME / CATÁLOGO
+   =============================================== */
+.home-section {
+  text-align: center;
+  width: 100%;
   padding: 2rem;
+}
+
+.home-section h1 {
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+}
+
+.products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
 }
 
-.productos .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+.product-card {
+  background-color: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   overflow: hidden;
-  box-shadow: 0 4px 20px var(--shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
-.productos .card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 6px 25px var(--accent-light);
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
 }
 
-.card img {
+.product-card img {
   width: 100%;
   height: 180px;
   object-fit: cover;
 }
 
-.card .info {
+.product-info {
   padding: 1rem;
+  text-align: left;
 }
-.card .info h3 {
-  margin: 0.2rem 0;
+
+.product-info h3 {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+  color: #222;
 }
-.card .info p {
+
+.product-info p {
+  color: #666;
   font-size: 0.9rem;
-  opacity: 0.9;
 }
 
-/* ===========================================
-   🛒 Carrito
-=========================================== */
-.cart-panel {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 340px;
-  height: 100%;
-  background: var(--card);
-  box-shadow: -4px 0 16px var(--shadow);
-  transform: translateX(100%);
-  transition: transform 0.4s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.cart-panel.show {
-  transform: translateX(0);
+.price {
+  font-weight: 600;
+  color: var(--primary-color);
 }
 
-.cart-panel-header, .cart-panel-footer {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.cart-items {
-  padding: 1rem;
-  overflow-y: auto;
-  flex: 1;
-}
-
-/* ===========================================
-   💳 Modal de compra (3 pasos)
-=========================================== */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-.modal.hidden {
-  display: none;
-}
-
-.modal-content {
-  background: var(--card);
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px var(--shadow);
-  width: 90%;
-  max-width: 420px;
-  animation: slideIn 0.4s ease;
-}
-
-@keyframes slideIn {
-  from { transform: translateY(-40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.form-step {
-  display: none;
-}
-.form-step.active {
-  display: block;
-}
-
-.step-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-}
-
-/* ===========================================
-   🍰 Toast (mensaje final)
-=========================================== */
-.toast {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%) scale(0.8);
-  background: var(--accent);
-  color: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px var(--shadow);
-  opacity: 0;
-  transition: all 0.4s ease;
-  z-index: 150;
-}
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
-}
-
-/* ===========================================
-   ⚙️ Footer
-=========================================== */
-.footer {
+/* ===============================================
+   PERFIL DE USUARIO
+   =============================================== */
+.profile-section {
   text-align: center;
-  padding: 1rem;
-  font-size: 0.85rem;
-  color: var(--text);
-  opacity: 0.8;
+  padding: 2rem;
 }
 
-/* ===========================================
-   📱 Responsividad
-=========================================== */
-@media (max-width: 600px) {
-  .header {
+.profile-card {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: inline-block;
+  min-width: 300px;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  border: 3px solid var(--primary-color);
+  object-fit: cover;
+}
+
+/* ===============================================
+   RESPONSIVE DESIGN
+   =============================================== */
+@media (max-width: 768px) {
+  .header-container {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
   }
-  .cart-panel {
-    width: 100%;
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .login-section,
+  .register-section {
+    padding: 1.8rem;
   }
 }
 
-:root {
-  --bg: #f6f8fa;
-  --text-color: #111;
-  --card-bg: #fff;
-  --accent: #007bff;
-  --shadow: rgba(0, 0, 0, 0.15);
+/* ===============================================
+   ANIMACIONES SUAVES
+   =============================================== */
+button, input {
+  transition: all var(--transition);
 }
 
-/* 🔥 modo oscuro */
-body.dark {
-  --bg: #0c0b0c;
-  --text-color: #f0f0f0;
-  --card-bg: #1a1a1a;
-  --accent: #ff1c1c;
-  --shadow: rgba(255, 0, 0, 0.25);
+.product-card {
+  transition: all var(--transition);
 }
 
-/* generales */
-body {
-  background: var(--bg);
-  color: var(--text-color);
-  font-family: "Segoe UI", sans-serif;
-  margin: 0;
-  transition: background 0.3s, color 0.3s;
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
 }
 
-.header, .footer {
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.btn, .btn-header {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.btn:hover, .btn-header:hover { opacity: 0.85; }
-
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal.hidden { display: none; }
-
-.modal-content {
-  background: var(--card-bg);
-  color: var(--text-color);
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 8px 24px var(--shadow);
-  width: 90%;
-  max-width: 480px;
-  position: relative;
-  animation: fadeIn 0.3s ease;
-}
-
-.close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 1.3rem;
-  cursor: pointer;
-}
-
-h2, h3 { margin-top: 0; }
-
-.step.hidden { display: none; }
-.step.active { display: block; animation: fadeIn 0.4s ease; }
-
-input, select {
-  width: 100%;
-  padding: 0.6rem;
-  margin: 0.4rem 0 1rem 0;
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-color);
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-
-/* popup visual */
-.popup-msg {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.8);
-  background: var(--card-bg);
-  border: 2px solid var(--accent);
-  color: var(--text-color);
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px var(--shadow);
-  opacity: 0;
-  z-index: 2000;
-  transition: all 0.4s ease;
-  font-weight: bold;
-  text-align: center;
-}
-.popup-msg.visible {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-/* animaciones */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Animación de error en login */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.4s ease;
 }

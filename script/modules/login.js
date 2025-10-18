@@ -1,82 +1,83 @@
-import { initTheme } from './uiExtras.js';
+/**
+ * =======================================
+ *  LOGIN MODULE - Proyecto Final L. Álvarez
+ * =======================================
+ * 
+ * Funcionalidad:
+ *  - Validar usuario/contraseña contra data/login.json
+ *  - Mostrar errores amigables
+ *  - Guardar sesión en AppStorage (localStorage)
+ *  - Redirigir al home al loguear correctamente
+ *  - Evitar re-login si ya hay sesión activa
+ * 
+ * Dependencias: AppStorage (script/core/storage.js)
+ *                AppMain (script/core/main.js)
+ */
 
-// ===============================
-// 🔑 LOGIN PRINCIPAL
-// ===============================
-document.addEventListener('DOMContentLoaded', async () => {
-  initTheme();
-
-  const userList = document.getElementById('userList');
+document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('loginForm');
+  const msg = document.getElementById('loginMsg');
 
-  // Mostrar usuarios disponibles
-  const users = await cargarUsuarios();
-  renderUsuarios(users);
-
-  // Agregar los de localStorage (registrados)
-  const registrados = JSON.parse(localStorage.getItem('usuarios') || '[]');
-  if (registrados.length) {
-    const title = document.createElement('h4');
-    title.textContent = 'Usuarios registrados';
-    userList.appendChild(title);
-
-    registrados.forEach(u => {
-      const li = document.createElement('li');
-      li.textContent = `${u.usuario} - ${u.email}`;
-      userList.appendChild(li);
-    });
+  // Si el usuario ya está logueado, redirigir directamente
+  const existingUser = AppStorage.getUser();
+  if (existingUser) {
+    window.location.href = 'pages/home.html';
+    return;
   }
 
-  // Evento de login
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+    msg.textContent = '';
+    msg.style.color = '#ff4d4d';
 
-    const todos = [...users, ...registrados];
-    const user = todos.find(u => u.usuario === username && u.password === password);
+    const username = form.username.value.trim();
+    const password = form.password.value.trim();
 
-    if (user) {
-      localStorage.setItem('session', JSON.stringify(user));
-      mostrarToast('✅ Bienvenido ' + user.nombre);
-      setTimeout(() => (window.location.href = 'pages/home.html'), 1200);
-    } else {
-      mostrarToast('❌ Usuario o contraseña incorrectos');
+    // Validación básica de campos
+    if (!username || !password) {
+      msg.textContent = 'Por favor completá todos los campos.';
+      return;
+    }
+
+    try {
+      // Obtener los usuarios desde JSON local
+      const response = await fetch('data/login.json');
+      if (!response.ok) throw new Error('No se pudo cargar login.json');
+
+      const users = await response.json();
+
+      // Buscar usuario que coincida
+      const user = users.find(
+        (u) => u.username === username && u.password === password
+      );
+
+      if (!user) {
+        msg.textContent = 'Usuario o contraseña incorrectos.';
+        form.classList.add('shake');
+        setTimeout(() => form.classList.remove('shake'), 500);
+        return;
+      }
+
+      // Guardar en localStorage
+      AppStorage.setUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        username: user.username
+      });
+
+      msg.style.color = 'green';
+      msg.textContent = 'Inicio de sesión exitoso. Redirigiendo...';
+
+      // Animación y redirección
+      setTimeout(() => {
+        window.location.href = 'pages/home.html';
+      }, 1200);
+
+    } catch (error) {
+      console.error('Error al intentar iniciar sesión:', error);
+      msg.textContent = 'Error interno. Intentalo nuevamente más tarde.';
     }
   });
 });
-
-// ===============================
-// 📦 FUNCIONES AUXILIARES
-// ===============================
-async function cargarUsuarios() {
-  try {
-    const res = await fetch('script/data/login.json');
-    return await res.json();
-  } catch (err) {
-    console.error('Error cargando login.json', err);
-    return [];
-  }
-}
-
-function renderUsuarios(users) {
-  const ul = document.getElementById('userList');
-  ul.innerHTML = '';
-  users.forEach(u => {
-    const li = document.createElement('li');
-    li.textContent = `${u.usuario} - ${u.password}`;
-    ul.appendChild(li);
-  });
-}
-
-function mostrarToast(msg) {
-  const toast = document.createElement('div');
-  toast.className = 'toast show';
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 500);
-  }, 2000);
-}

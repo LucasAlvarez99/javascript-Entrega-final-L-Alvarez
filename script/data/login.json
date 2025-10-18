@@ -1,14 +1,20 @@
 [
   {
     "id": 1,
-    "usuario": "admin",
-    "password": "1234",
-    "nombre": "Administrador"
+    "name": "Administrador",
+    "username": "admin",
+    "password": "admin123",
+    "email": "admin@demo.local",
+    "role": "admin",
+    "createdAt": "2025-01-01T09:00:00Z"
   },
   {
     "id": 2,
-    "usuario": "demo",
-    "password": "demo",
-    "nombre": "Usuario Demo"
+    "name": "Usuario Demo",
+    "username": "demo",
+    "password": "demo1234",
+    "email": "demo@correo.com",
+    "role": "user",
+    "createdAt": "2025-01-10T12:00:00Z"
   }
 ]

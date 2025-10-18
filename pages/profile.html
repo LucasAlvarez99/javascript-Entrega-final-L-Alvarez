@@ -1,47 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Perfil - Tienda de Juegos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Perfil del usuario - Proyecto Final L. Álvarez" />
+  <title>Perfil | Proyecto L. Álvarez</title>
+
+  <!-- Tipografía y estilos -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../styles/style.css" />
 </head>
+
 <body>
-  <main class="profile-page">
-    <div class="profile-card">
-      <h2>Mi perfil</h2>
-      <div id="profileInfo"></div>
-      <div class="profile-actions">
-        <button id="logoutBtn" class="btn">Cerrar sesión</button>
-        <a href="../index.html" class="btn">Volver a la tienda</a>
-      </div>
+  <!-- HEADER GLOBAL -->
+  <header class="site-header">
+    <div class="container header-container">
+      <div class="logo">Proyecto L. Álvarez</div>
+      <nav class="nav-links">
+        <a href="../index.html">Login</a>
+        <a href="register.html">Registrarse</a>
+        <a href="home.html">Inicio</a>
+      </nav>
     </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <section class="profile-section">
+      <h1>Mi perfil</h1>
+      <p class="profile-subtitle">Información personal</p>
+
+      <div class="profile-card">
+        <img src="../assets/user.png" alt="Avatar de usuario" class="profile-avatar">
+        <h2 id="profileName">Usuario Demo</h2>
+        <p id="profileEmail">demo@correo.com</p>
+        <button id="logoutBtn" class="btn-login">Cerrar sesión</button>
+      </div>
+    </section>
   </main>
 
-  <script type="module">
-    // Simple profile page
-    const profileInfo = document.getElementById('profileInfo');
-    const logoutBtn = document.getElementById('logoutBtn');
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <p>© 2025 Proyecto Final - Lucas Álvarez</p>
+      <p>Desarrollado con dedicación por un programador full stack</p>
+    </div>
+  </footer>
 
-    function loadProfile() {
-      const session = JSON.parse(localStorage.getItem('session') || 'null');
-      if (!session) {
-        location.href = 'login.html';
-        return;
-      }
-      profileInfo.innerHTML = `
-        <p><strong>Usuario:</strong> ${session.usuario}</p>
-        <p><strong>Nombre:</strong> ${session.nombre || '—'}</p>
-        <p><strong>Logueado desde:</strong> ${new Date(session.timestamp).toLocaleString()}</p>
-      `;
-    }
-
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('session');
-      location.href = 'login.html';
-    });
-
-    loadProfile();
-  </script>
+  <!-- SCRIPTS -->
+  <script src="../script/core/main.js"></script>
+  <script src="../script/modules/profile.js"></script>
 </body>
 </html>
