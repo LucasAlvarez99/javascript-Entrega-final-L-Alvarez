@@ -1,5 +1,5 @@
-/* app.js - La Disquera (versión corregida)
-   Arregla el error de línea 71 y mejora el manejo de tempYoutubeLinks
+/* app.js - La Disquera - VERSIÓN FINAL
+   Con modales bonitos y sin mostrar links de YouTube
 */
 
 console.log('🎸 [app.js] Iniciando...');
@@ -15,7 +15,7 @@ const STATE = {
   isPlaying: false,
   progressTimer: null,
   youtubePlayer: null,
-  tempYoutubeLinks: [] // ✅ IMPORTANTE: Inicializar aquí
+  tempYoutubeLinks: []
 };
 
 const $ = sel => document.querySelector(sel);
@@ -32,22 +32,17 @@ async function loadData() {
     
     console.log('✅ [app.js] data.json cargado');
 
-    // Cargar bandas guardadas por el usuario desde localStorage
     const storedBands = JSON.parse(localStorage.getItem('disquera_bands') || '[]');
     console.log(`📊 [app.js] ${storedBands.length} bandas guardadas encontradas`);
     
     STATE.bands = [...data.bands, ...storedBands];
     STATE.albums = data.albums;
-
-    // Recalcular géneros
     STATE.bands.forEach(b => STATE.genres.add(b.genre));
     
     console.log(`✅ [app.js] ${STATE.bands.length} bandas cargadas en total`);
-
     return data;
   } catch (error) {
     console.error('❌ [app.js] Error al cargar datos:', error);
-    // Inicializar con arrays vacíos si falla
     STATE.bands = [];
     STATE.albums = [];
     return { bands: [], albums: [] };
@@ -59,7 +54,6 @@ function saveBandsToLocalStorage() {
   console.log('💾 [app.js] Guardando bandas personalizadas...');
   
   try {
-    // Guardamos solo las bandas nuevas (no las originales del JSON)
     const baseIDs = new Set(['b1','b2','b3']);
     const customBands = STATE.bands.filter(b => !baseIDs.has(b.id));
     localStorage.setItem('disquera_bands', JSON.stringify(customBands));
@@ -70,7 +64,7 @@ function saveBandsToLocalStorage() {
   }
 }
 
-/* ------------------ YOUTUBE LINKS ------------------ */
+/* ------------------ YOUTUBE UTILS ------------------ */
 function isValidYoutubeUrl(url) {
   const pattern = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   return pattern.test(url);
@@ -94,36 +88,32 @@ function addYoutubeLink() {
   console.log('📊 [app.js] URL:', url);
   
   if (!url) {
-    showToast('⚠️ Ingresa una URL de YouTube', 'error');
+    window.albumsCore.showToast('⚠️ Ingresa una URL de YouTube', 'warning');
     return;
   }
   
   if (!isValidYoutubeUrl(url)) {
-    showToast('⚠️ URL de YouTube inválida', 'error');
+    window.albumsCore.showToast('⚠️ URL de YouTube inválida', 'error');
     return;
   }
   
   const videoId = getYoutubeVideoId(url);
   if (!videoId) {
-    showToast('⚠️ No se pudo extraer el ID del video', 'error');
+    window.albumsCore.showToast('⚠️ No se pudo extraer el ID del video', 'error');
     return;
   }
   
   console.log('✅ [app.js] Video ID extraído:', videoId);
   
-  // ✅ IMPORTANTE: Asegurar que tempYoutubeLinks existe
   if (!Array.isArray(STATE.tempYoutubeLinks)) {
-    console.warn('⚠️ [app.js] tempYoutubeLinks no era array, inicializando...');
     STATE.tempYoutubeLinks = [];
   }
   
-  // Verificar duplicados
   if (STATE.tempYoutubeLinks.some(link => link.videoId === videoId)) {
-    showToast('⚠️ Este video ya fue agregado', 'warning');
+    window.albumsCore.showToast('⚠️ Este video ya fue agregado', 'warning');
     return;
   }
   
-  // Agregar a la lista temporal
   STATE.tempYoutubeLinks.push({
     url: url,
     videoId: videoId
@@ -131,12 +121,9 @@ function addYoutubeLink() {
   
   console.log(`✅ [app.js] Video agregado. Total: ${STATE.tempYoutubeLinks.length}`);
   
-  // Actualizar vista previa
   renderYoutubeLinks();
-  
-  // Limpiar input
   input.value = '';
-  showToast('✅ Video agregado', 'success');
+  window.albumsCore.showToast('✅ Video agregado', 'success');
 }
 
 function renderYoutubeLinks() {
@@ -148,51 +135,60 @@ function renderYoutubeLinks() {
     return;
   }
   
-  // ✅ LÍNEA 71 ARREGLADA: Verificar que tempYoutubeLinks existe y es array
   if (!STATE.tempYoutubeLinks || !Array.isArray(STATE.tempYoutubeLinks)) {
-    console.warn('⚠️ [app.js] tempYoutubeLinks no existe, inicializando...');
     STATE.tempYoutubeLinks = [];
   }
   
   console.log(`📊 [app.js] Renderizando ${STATE.tempYoutubeLinks.length} videos`);
   
   if (STATE.tempYoutubeLinks.length === 0) {
-    container.innerHTML = '<p style="color:#888">No hay videos agregados</p>';
+    container.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No hay videos agregados</p>';
     return;
   }
   
+  // NO MOSTRAR IFRAMES - Solo lista de canciones
   container.innerHTML = STATE.tempYoutubeLinks.map((link, index) => `
-    <div class="youtube-preview" style="position:relative; margin-bottom:10px;">
-      <iframe 
-        width="100%" 
-        height="120px" 
-        src="https://www.youtube.com/embed/${link.videoId}"
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen
-        style="border-radius:8px;">
-      </iframe>
+    <div class="song-preview-item" style="
+      background: rgba(255,167,38,0.1);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--accent);
+    ">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.2rem;">🎵</span>
+        <div>
+          <div style="color: #fff; font-weight: 500;">Canción ${index + 1}</div>
+          <small style="color: #9aa4b2;">Solo audio del video</small>
+        </div>
+      </div>
       <button class="btn" 
               onclick="removeYoutubeLink(${index})"
-              style="margin-top:8px;">
+              style="
+                background: rgba(244,67,54,0.2);
+                color: #f44336;
+                padding: 6px 12px;
+                font-size: 0.9rem;
+              ">
         Eliminar
       </button>
     </div>
   `).join('');
   
-  console.log('✅ [app.js] Videos renderizados');
+  console.log('✅ [app.js] Videos renderizados (solo audio)');
 }
 
 function removeYoutubeLink(index) {
   console.log('🗑️ [app.js] Removiendo video:', index);
   
   if (!STATE.tempYoutubeLinks || !Array.isArray(STATE.tempYoutubeLinks)) {
-    console.error('❌ [app.js] tempYoutubeLinks no existe');
     return;
   }
   
   if (index < 0 || index >= STATE.tempYoutubeLinks.length) {
-    console.error('❌ [app.js] Índice inválido');
     return;
   }
   
@@ -200,44 +196,7 @@ function removeYoutubeLink(index) {
   console.log(`✅ [app.js] Video removido. Quedan: ${STATE.tempYoutubeLinks.length}`);
   
   renderYoutubeLinks();
-  showToast('🗑️ Video eliminado', 'success');
-}
-
-function showToast(message, type = 'success') {
-  console.log(`🍞 [app.js] Toast: ${message}`);
-  
-  const container = document.getElementById('toast-container') || createToastContainer();
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  
-  const colors = {
-    success: '#4caf50',
-    error: '#d9534f',
-    warning: '#ff9800',
-    info: '#2196f3'
-  };
-  
-  toast.style.background = colors[type] || colors.success;
-  container.appendChild(toast);
-  
-  setTimeout(() => toast.remove(), 4000);
-}
-
-function createToastContainer() {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-    `;
-    document.body.appendChild(container);
-  }
-  return container;
+  window.albumsCore.showToast('🗑️ Video eliminado', 'info');
 }
 
 // Vista previa de imagen
@@ -265,17 +224,18 @@ if (bandImgInput) {
 function deleteBand(id) {
   console.log('🗑️ [app.js] Eliminando banda:', id);
   
-  if (!confirm('¿Seguro que querés eliminar esta banda?')) {
-    console.log('❌ [app.js] Eliminación cancelada');
-    return;
-  }
+  const band = STATE.bands.find(b => b.id === id);
+  if (!band) return;
   
-  STATE.bands = STATE.bands.filter(b => b.id !== id);
-  saveBandsToLocalStorage();
-  renderBands();
-  
-  console.log('✅ [app.js] Banda eliminada');
-  showToast('🗑️ Banda eliminada', 'info');
+  // USAR MODAL BONITO en lugar de confirm()
+  window.modalSystem.deleteBand(band.name, () => {
+    STATE.bands = STATE.bands.filter(b => b.id !== id);
+    saveBandsToLocalStorage();
+    renderBands();
+    
+    console.log('✅ [app.js] Banda eliminada');
+    window.albumsCore.showToast(`🗑️ Banda "${band.name}" eliminada`, 'info');
+  });
 }
 
 /* ------------------ RENDERS ------------------ */
@@ -283,10 +243,7 @@ function renderGenres() {
   console.log('🎨 [app.js] Renderizando géneros...');
   
   const sel = $('#genre-filter');
-  if (!sel) {
-    console.error('❌ [app.js] Selector de género no encontrado');
-    return;
-  }
+  if (!sel) return;
   
   sel.innerHTML = `<option value="">Todos los géneros</option>`;
   Array.from(new Set(STATE.bands.map(b => b.genre))).forEach(g => {
@@ -304,10 +261,7 @@ function renderBands(filterText = '', genre = '') {
   console.log('📊 [app.js] Filtros:', { filterText, genre });
   
   const container = $('#bands-list');
-  if (!container) {
-    console.error('❌ [app.js] Contenedor bands-list no encontrado');
-    return;
-  }
+  if (!container) return;
   
   container.innerHTML = '';
   
@@ -336,6 +290,11 @@ function renderBands(filterText = '', genre = '') {
       <h3>${b.name}</h3>
       <div class="meta">${b.genre}</div>
       <small style="color:#aaa">${b.bio || ''}</small>
+      ${b.youtube && b.youtube.length > 0 ? `
+        <div style="margin-top:8px; padding:8px; background:rgba(255,167,38,0.1); border-radius:6px;">
+          <small style="color:var(--accent);">🎵 ${b.youtube.length} canciones (solo audio)</small>
+        </div>
+      ` : ''}
       <div style="margin-top:auto;display:flex;gap:8px">
         <button class="btn view-albums" data-band="${b.id}">Ver álbumes</button>
         <button class="btn delete-band" data-band="${b.id}">Eliminar</button>
@@ -351,7 +310,6 @@ function renderBands(filterText = '', genre = '') {
       console.log('👁️ [app.js] Ver álbumes de banda:', bandId);
       STATE.currentBandId = bandId;
       
-      // Usar la función del módulo albums-render si existe
       if (window.albumsRender && typeof window.albumsRender.renderAlbums === 'function') {
         window.albumsRender.renderAlbums(bandId);
       }
@@ -379,14 +337,10 @@ function bindUI() {
       e.preventDefault();
       console.log('📝 [app.js] Formulario de banda enviado');
       
-      const form = e.target;
-      
-      // ✅ Asegurar que tempYoutubeLinks existe
       if (!Array.isArray(STATE.tempYoutubeLinks)) {
         STATE.tempYoutubeLinks = [];
       }
       
-      // Crear nueva banda
       const newBand = {
         id: 'b' + Date.now(),
         name: $('#band-name').value.trim(),
@@ -400,13 +354,11 @@ function bindUI() {
       
       console.log('📊 [app.js] Nueva banda:', newBand);
       
-      // Validar
       if (!newBand.name || !newBand.genre) {
-        showToast('⚠️ Nombre y género son obligatorios', 'error');
+        window.albumsCore.showToast('⚠️ Nombre y género son obligatorios', 'error');
         return;
       }
       
-      // Procesar imagen si existe
       const imgInput = $('#band-img');
       if (imgInput && imgInput.files[0]) {
         const reader = new FileReader();
@@ -421,14 +373,12 @@ function bindUI() {
     });
   }
   
-  // Botón para agregar video de YouTube
   const addYoutubeBtn = $('#add-youtube');
   if (addYoutubeBtn) {
     addYoutubeBtn.addEventListener('click', addYoutubeLink);
     console.log('✅ [app.js] Botón de YouTube configurado');
   }
   
-  // Búsqueda y filtros
   const searchInput = $('#search-input');
   if (searchInput) {
     searchInput.addEventListener('input', debounce(() => applySearchAndFilter(), 250));
@@ -454,29 +404,24 @@ function bindUI() {
 function finalizeBandCreation(newBand) {
   console.log('✅ [app.js] Finalizando creación de banda...');
   
-  // Agregar banda
   STATE.bands.push(newBand);
   STATE.genres.add(newBand.genre);
   
-  // Guardar
   saveBandsToLocalStorage();
   
-  // Limpiar formulario
   const form = $('#band-form');
   if (form) form.reset();
   
   const preview = $('#preview-img');
   if (preview) preview.classList.add('hidden');
   
-  // Limpiar links de YouTube
   STATE.tempYoutubeLinks = [];
   renderYoutubeLinks();
   
-  // Actualizar UI
   renderGenres();
   renderBands();
   
-  showToast(`✅ Banda "${newBand.name}" agregada exitosamente`);
+  window.albumsCore.showToast(`✅ Banda "${newBand.name}" agregada exitosamente`, 'success');
   console.log('✅ [app.js] Banda creada exitosamente');
 }
 
@@ -514,7 +459,7 @@ async function bootstrap() {
   }
 }
 
-// Exponer funciones globales necesarias
+// Exponer funciones globales
 window.removeYoutubeLink = removeYoutubeLink;
 window.deleteBand = deleteBand;
 
