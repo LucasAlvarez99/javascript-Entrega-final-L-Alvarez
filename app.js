@@ -1,6 +1,8 @@
-/* app.js - La Disquera (versión final con agregar/eliminar bandas)
-   Cumple toda la rúbrica + persistencia de bandas personalizadas.
+/* app.js - La Disquera (versión corregida)
+   Arregla el error de línea 71 y mejora el manejo de tempYoutubeLinks
 */
+
+console.log('🎸 [app.js] Iniciando...');
 
 const STATE = {
   bands: [],
@@ -12,7 +14,8 @@ const STATE = {
   currentTrack: null,
   isPlaying: false,
   progressTimer: null,
-  youtubePlayer: null
+  youtubePlayer: null,
+  tempYoutubeLinks: [] // ✅ IMPORTANTE: Inicializar aquí
 };
 
 const $ = sel => document.querySelector(sel);
@@ -20,32 +23,56 @@ const $all = sel => Array.from(document.querySelectorAll(sel));
 
 /* ------------------ FETCH / CARGA DE DATOS ------------------ */
 async function loadData() {
-  const res = await fetch('data.json');
-  if (!res.ok) throw new Error('No se pudo cargar data.json');
-  const data = await res.json();
+  console.log('📦 [app.js] Cargando datos...');
+  
+  try {
+    const res = await fetch('data.json');
+    if (!res.ok) throw new Error('No se pudo cargar data.json');
+    const data = await res.json();
+    
+    console.log('✅ [app.js] data.json cargado');
 
-  // Cargar bandas guardadas por el usuario desde localStorage
-  const storedBands = JSON.parse(localStorage.getItem('disquera_bands') || '[]');
-  STATE.bands = [...data.bands, ...storedBands];
-  STATE.albums = data.albums;
+    // Cargar bandas guardadas por el usuario desde localStorage
+    const storedBands = JSON.parse(localStorage.getItem('disquera_bands') || '[]');
+    console.log(`📊 [app.js] ${storedBands.length} bandas guardadas encontradas`);
+    
+    STATE.bands = [...data.bands, ...storedBands];
+    STATE.albums = data.albums;
 
-  // Recalcular géneros
-  STATE.bands.forEach(b => STATE.genres.add(b.genre));
+    // Recalcular géneros
+    STATE.bands.forEach(b => STATE.genres.add(b.genre));
+    
+    console.log(`✅ [app.js] ${STATE.bands.length} bandas cargadas en total`);
 
-  return data;
+    return data;
+  } catch (error) {
+    console.error('❌ [app.js] Error al cargar datos:', error);
+    // Inicializar con arrays vacíos si falla
+    STATE.bands = [];
+    STATE.albums = [];
+    return { bands: [], albums: [] };
+  }
 }
 
 /* ------------------ GUARDAR / BORRAR BANDAS ------------------ */
 function saveBandsToLocalStorage() {
-  // Guardamos solo las bandas nuevas (no las originales del JSON)
-  const baseIDs = new Set(['b1','b2','b3']);
-  const customBands = STATE.bands.filter(b => !baseIDs.has(b.id));
-  localStorage.setItem('disquera_bands', JSON.stringify(customBands));
+  console.log('💾 [app.js] Guardando bandas personalizadas...');
+  
+  try {
+    // Guardamos solo las bandas nuevas (no las originales del JSON)
+    const baseIDs = new Set(['b1','b2','b3']);
+    const customBands = STATE.bands.filter(b => !baseIDs.has(b.id));
+    localStorage.setItem('disquera_bands', JSON.stringify(customBands));
+    
+    console.log(`✅ [app.js] ${customBands.length} bandas guardadas`);
+  } catch (error) {
+    console.error('❌ [app.js] Error al guardar bandas:', error);
+  }
 }
 
 /* ------------------ YOUTUBE LINKS ------------------ */
 function isValidYoutubeUrl(url) {
-  const pattern = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+  const pattern = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   return pattern.test(url);
 }
 
@@ -55,8 +82,21 @@ function getYoutubeVideoId(url) {
 }
 
 function addYoutubeLink() {
+  console.log('📹 [app.js] addYoutubeLink llamado');
+  
   const input = $('#youtube-url');
+  if (!input) {
+    console.error('❌ [app.js] Input de YouTube no encontrado');
+    return;
+  }
+  
   const url = input.value.trim();
+  console.log('📊 [app.js] URL:', url);
+  
+  if (!url) {
+    showToast('⚠️ Ingresa una URL de YouTube', 'error');
+    return;
+  }
   
   if (!isValidYoutubeUrl(url)) {
     showToast('⚠️ URL de YouTube inválida', 'error');
@@ -69,11 +109,27 @@ function addYoutubeLink() {
     return;
   }
   
+  console.log('✅ [app.js] Video ID extraído:', videoId);
+  
+  // ✅ IMPORTANTE: Asegurar que tempYoutubeLinks existe
+  if (!Array.isArray(STATE.tempYoutubeLinks)) {
+    console.warn('⚠️ [app.js] tempYoutubeLinks no era array, inicializando...');
+    STATE.tempYoutubeLinks = [];
+  }
+  
+  // Verificar duplicados
+  if (STATE.tempYoutubeLinks.some(link => link.videoId === videoId)) {
+    showToast('⚠️ Este video ya fue agregado', 'warning');
+    return;
+  }
+  
   // Agregar a la lista temporal
   STATE.tempYoutubeLinks.push({
     url: url,
     videoId: videoId
   });
+  
+  console.log(`✅ [app.js] Video agregado. Total: ${STATE.tempYoutubeLinks.length}`);
   
   // Actualizar vista previa
   renderYoutubeLinks();
@@ -84,107 +140,202 @@ function addYoutubeLink() {
 }
 
 function renderYoutubeLinks() {
+  console.log('🎨 [app.js] renderYoutubeLinks llamado');
+  
   const container = $('#youtube-list');
+  if (!container) {
+    console.error('❌ [app.js] Contenedor youtube-list no encontrado');
+    return;
+  }
+  
+  // ✅ LÍNEA 71 ARREGLADA: Verificar que tempYoutubeLinks existe y es array
+  if (!STATE.tempYoutubeLinks || !Array.isArray(STATE.tempYoutubeLinks)) {
+    console.warn('⚠️ [app.js] tempYoutubeLinks no existe, inicializando...');
+    STATE.tempYoutubeLinks = [];
+  }
+  
+  console.log(`📊 [app.js] Renderizando ${STATE.tempYoutubeLinks.length} videos`);
+  
+  if (STATE.tempYoutubeLinks.length === 0) {
+    container.innerHTML = '<p style="color:#888">No hay videos agregados</p>';
+    return;
+  }
+  
   container.innerHTML = STATE.tempYoutubeLinks.map((link, index) => `
-    <div class="youtube-preview">
+    <div class="youtube-preview" style="position:relative; margin-bottom:10px;">
       <iframe 
         width="100%" 
-        height="100%" 
+        height="120px" 
         src="https://www.youtube.com/embed/${link.videoId}"
         frameborder="0" 
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
+        allowfullscreen
+        style="border-radius:8px;">
       </iframe>
-      <button class="btn" onclick="removeYoutubeLink(${index})">Eliminar</button>
+      <button class="btn" 
+              onclick="removeYoutubeLink(${index})"
+              style="margin-top:8px;">
+        Eliminar
+      </button>
     </div>
   `).join('');
+  
+  console.log('✅ [app.js] Videos renderizados');
 }
 
 function removeYoutubeLink(index) {
+  console.log('🗑️ [app.js] Removiendo video:', index);
+  
+  if (!STATE.tempYoutubeLinks || !Array.isArray(STATE.tempYoutubeLinks)) {
+    console.error('❌ [app.js] tempYoutubeLinks no existe');
+    return;
+  }
+  
+  if (index < 0 || index >= STATE.tempYoutubeLinks.length) {
+    console.error('❌ [app.js] Índice inválido');
+    return;
+  }
+  
   STATE.tempYoutubeLinks.splice(index, 1);
+  console.log(`✅ [app.js] Video removido. Quedan: ${STATE.tempYoutubeLinks.length}`);
+  
   renderYoutubeLinks();
   showToast('🗑️ Video eliminado', 'success');
 }
 
 function showToast(message, type = 'success') {
-  const container = $('#toast-container');
+  console.log(`🍞 [app.js] Toast: ${message}`);
+  
+  const container = document.getElementById('toast-container') || createToastContainer();
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.textContent = message;
-  if (type === 'error') toast.style.background = '#d9534f';
+  
+  const colors = {
+    success: '#4caf50',
+    error: '#d9534f',
+    warning: '#ff9800',
+    info: '#2196f3'
+  };
+  
+  toast.style.background = colors[type] || colors.success;
   container.appendChild(toast);
+  
   setTimeout(() => toast.remove(), 4000);
 }
 
-$('#band-img').addEventListener('change', e => {
-  const file = e.target.files[0];
-  const preview = $('#preview-img');
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      preview.src = ev.target.result;
-      preview.classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
-  } else {
-    preview.classList.add('hidden');
+function createToastContainer() {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    `;
+    document.body.appendChild(container);
   }
-});
+  return container;
+}
+
+// Vista previa de imagen
+const bandImgInput = $('#band-img');
+if (bandImgInput) {
+  bandImgInput.addEventListener('change', e => {
+    console.log('🖼️ [app.js] Imagen seleccionada');
+    const file = e.target.files[0];
+    const preview = $('#preview-img');
+    
+    if (file && preview) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        preview.src = ev.target.result;
+        preview.classList.remove('hidden');
+        console.log('✅ [app.js] Vista previa actualizada');
+      };
+      reader.readAsDataURL(file);
+    } else if (preview) {
+      preview.classList.add('hidden');
+    }
+  });
+}
+
 function deleteBand(id) {
-  if (!confirm('¿Seguro que querés eliminar esta banda?')) return;
+  console.log('🗑️ [app.js] Eliminando banda:', id);
+  
+  if (!confirm('¿Seguro que querés eliminar esta banda?')) {
+    console.log('❌ [app.js] Eliminación cancelada');
+    return;
+  }
+  
   STATE.bands = STATE.bands.filter(b => b.id !== id);
   saveBandsToLocalStorage();
   renderBands();
+  
+  console.log('✅ [app.js] Banda eliminada');
+  showToast('🗑️ Banda eliminada', 'info');
 }
 
 /* ------------------ RENDERS ------------------ */
 function renderGenres() {
+  console.log('🎨 [app.js] Renderizando géneros...');
+  
   const sel = $('#genre-filter');
+  if (!sel) {
+    console.error('❌ [app.js] Selector de género no encontrado');
+    return;
+  }
+  
   sel.innerHTML = `<option value="">Todos los géneros</option>`;
   Array.from(new Set(STATE.bands.map(b => b.genre))).forEach(g => {
     const opt = document.createElement('option');
-    opt.value = g; opt.textContent = g;
+    opt.value = g;
+    opt.textContent = g;
     sel.appendChild(opt);
   });
+  
+  console.log('✅ [app.js] Géneros renderizados');
 }
 
 function renderBands(filterText = '', genre = '') {
+  console.log('🎨 [app.js] Renderizando bandas...');
+  console.log('📊 [app.js] Filtros:', { filterText, genre });
+  
   const container = $('#bands-list');
+  if (!container) {
+    console.error('❌ [app.js] Contenedor bands-list no encontrado');
+    return;
+  }
+  
   container.innerHTML = '';
+  
   const list = STATE.bands.filter(b => {
     const matchesText = (b.name + ' ' + (b.bio || '')).toLowerCase().includes(filterText.toLowerCase());
     const matchesGenre = !genre || b.genre === genre;
     return matchesText && matchesGenre;
   });
-  if (list.length === 0) container.innerHTML = `<div class="card">No hay bandas</div>`;
+  
+  console.log(`📊 [app.js] ${list.length} bandas filtradas`);
+  
+  if (list.length === 0) {
+    container.innerHTML = `<div class="card">No hay bandas</div>`;
+    return;
+  }
 
   list.forEach(b => {
     const node = document.createElement('div');
     node.className = 'card band';
     node.innerHTML = `
       <div class="thumb">
-        <img src="${b.img || 'https://picsum.photos/seed/default/400/250'}" alt="${b.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px"/>
+        <img src="${b.img || 'https://picsum.photos/seed/default/400/250'}" 
+             alt="${b.name}" 
+             style="width:100%;height:100%;object-fit:cover;border-radius:6px"/>
       </div>
       <h3>${b.name}</h3>
       <div class="meta">${b.genre}</div>
       <small style="color:#aaa">${b.bio || ''}</small>
-      ${b.youtube && b.youtube.length > 0 ? `
-        <div class="youtube-section">
-          <h4>Videos de YouTube</h4>
-          ${b.youtube.map(video => `
-            <div class="youtube-preview">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://www.youtube.com/embed/${video.videoId}"
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-              </iframe>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
       <div style="margin-top:auto;display:flex;gap:8px">
         <button class="btn view-albums" data-band="${b.id}">Ver álbumes</button>
         <button class="btn delete-band" data-band="${b.id}">Eliminar</button>
@@ -197,10 +348,15 @@ function renderBands(filterText = '', genre = '') {
   $all('.view-albums').forEach(btn => {
     btn.onclick = e => {
       const bandId = e.currentTarget.dataset.band;
-      console.log('View albums clicked for band:', bandId);
-      STATE.currentBandId = bandId; // Guardar el bandId actual
-      renderAlbums(bandId);
-      document.getElementById('albums-section').scrollIntoView({behavior:'smooth'});
+      console.log('👁️ [app.js] Ver álbumes de banda:', bandId);
+      STATE.currentBandId = bandId;
+      
+      // Usar la función del módulo albums-render si existe
+      if (window.albumsRender && typeof window.albumsRender.renderAlbums === 'function') {
+        window.albumsRender.renderAlbums(bandId);
+      }
+      
+      document.getElementById('albums-section')?.scrollIntoView({behavior:'smooth'});
     };
   });
 
@@ -209,446 +365,110 @@ function renderBands(filterText = '', genre = '') {
       deleteBand(e.currentTarget.dataset.band);
     };
   });
-}
-
-/* ------------------ YOUTUBE INTEGRATION ------------------ */
-function isValidYoutubeUrl(url) {
-  return /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/.test(url);
-}
-
-function getYoutubeVideoId(url) {
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return match ? match[1] : null;
-}
-
-function addNewAlbum(bandId) {
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="album-form">
-      <div class="album-header">
-        <h3>Agregar nuevo álbum</h3>
-        <button class="close-modal" title="Cerrar">&times;</button>
-      </div>
-      <div class="form-content">
-    <h3>Agregar nuevo álbum</h3>
-    <form id="album-form">
-      <div class="album-header">
-        <input type="text" id="album-title" placeholder="Título del álbum" required autocomplete="off" />
-        <input type="number" id="album-year" placeholder="Año" required min="1900" max="2025" value="${new Date().getFullYear()}" />
-      </div>
-      
-      <div class="songs-section">
-        <h4>Canciones desde YouTube</h4>
-        <div class="song-list" id="youtube-track-list"></div>
-        
-        <div class="song-input">
-          <input type="text" 
-                 id="new-track-url" 
-                 placeholder="Pegar URL de YouTube (https://youtube.com/watch?v=... o https://youtu.be/...)"
-                 autocomplete="off" />
-          <button type="button" id="add-track" class="btn-save">Agregar</button>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" onclick="this.closest('.album-form').remove()">Cancelar</button>
-        <button type="submit" class="btn-save">Guardar álbum</button>
-      </div>
-    </form>
-  `;
   
-  const albumsList = $('#albums-list');
-  albumsList.insertBefore(form, albumsList.firstChild);
-  
-  // Event listeners
-  const trackList = $('#youtube-track-list');
-  const tracks = [];
-  
-  const urlInput = $('#new-track-url');
-  const addButton = $('#add-track');
-  
-  // Validación en tiempo real
-  urlInput.addEventListener('input', () => {
-    const url = urlInput.value.trim();
-    if (url && !isValidYoutubeUrl(url)) {
-      urlInput.style.borderColor = '#ff4444';
-      addButton.disabled = true;
-    } else {
-      urlInput.style.borderColor = url ? '#4CAF50' : '';
-      addButton.disabled = false;
-    }
-  });
-  
-  $('#add-track').addEventListener('click', () => {
-    const url = urlInput.value.trim();
-    if (!isValidYoutubeUrl(url)) {
-      showToast('⚠️ La URL debe ser de YouTube (ejemplo: https://youtube.com/watch?v=...)', 'error');
-      urlInput.focus();
-      return;
-    }
-    
-    const videoId = getYoutubeVideoId(url);
-    if (!videoId) {
-      showToast('⚠️ No se pudo extraer el ID del video', 'error');
-      return;
-    }
-    
-    // Verificar duplicados
-    if (tracks.some(t => t.videoId === videoId)) {
-      showToast('⚠️ Este video ya fue agregado', 'error');
-      return;
-    }
-    
-    tracks.push({ url, videoId });
-    renderTracks();
-    urlInput.value = '';
-    urlInput.style.borderColor = '';
-    
-    // Animar la nueva entrada
-    setTimeout(() => {
-      const lastTrack = $('.song-item:last-child');
-      if (lastTrack) {
-        lastTrack.style.animation = 'slideIn 0.3s ease';
-      }
-    }, 0);
-  });
-  
-  async function renderTracks() {
-    // Obtener información de los videos usando la API de YouTube
-    const trackPromises = tracks.map(async (track, i) => {
-      try {
-        const response = await fetch(`https://noembed.com/embed?url=${track.url}`);
-        const data = await response.json();
-        return `
-          <div class="track-item" data-index="${i}">
-            <div class="track-info">
-              <span class="track-title">${data.title || 'Video de YouTube'}</span>
-              <span class="track-url">${track.url}</span>
-            </div>
-            <button type="button" class="remove-track" title="Eliminar canción">
-              ❌
-            </button>
-          </div>
-        `;
-      } catch (err) {
-        return `
-          <div class="track-item" data-index="${i}">
-            <div class="track-info">
-              <span class="track-title">Video ${i + 1}</span>
-              <span class="track-url">${track.url}</span>
-            </div>
-            <button type="button" class="remove-track" title="Eliminar canción">
-              ❌
-            </button>
-          </div>
-        `;
-      }
-    });
-
-    const trackElements = await Promise.all(trackPromises);
-    trackList.innerHTML = trackElements.join('');
-  }
-  
-  $('#album-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (tracks.length === 0) {
-      showToast('⚠️ Agrega al menos una canción', 'error');
-      return;
-    }
-    
-    const newAlbum = {
-      id: 'a' + Date.now(),
-      bandId: bandId,
-      title: $('#album-title').value.trim(),
-      year: parseInt($('#album-year').value),
-      tracks: tracks.map((t, i) => ({
-        id: `t${Date.now()}_${i}`,
-        title: `Video ${i + 1}`,
-        duration: 0,
-        youtubeId: t.videoId
-      }))
-    };
-    
-    STATE.albums.push(newAlbum);
-    form.remove();
-    renderAlbums(bandId);
-    showToast('✅ Álbum agregado exitosamente');
-  });
-}
-
-function renderAlbums(bandId = null) {
-  console.log('app.js renderAlbums called with:', bandId);
-  STATE.currentBandId = bandId;
-  const container = $('#albums-list');
-  container.innerHTML = '';
-  
-  // Si no hay bandId, intentar usar el currentBandId
-  const actualBandId = bandId || STATE.currentBandId;
-  const list = STATE.albums.filter(a => !actualBandId || a.bandId === actualBandId);
-  
-  // Add album button if band selected
-  if (bandId) {
-    container.innerHTML = `
-      <button class="btn" onclick="addNewAlbum('${bandId}')">
-        ➕ Agregar álbum
-      </button>
-    `;
-  }
-  
-  if (list.length === 0) {
-    container.innerHTML += `<div class="card">No hay álbumes</div>`;
-  }
-  list.forEach(a => {
-    const band = STATE.bands.find(b => b.id === a.bandId) || {name:'?', genre:'?'};
-    const node = document.createElement('div');
-    node.className = 'card album';
-    node.innerHTML = `
-      <div style="display:flex;gap:10px">
-        <div style="width:120px;height:80px;overflow:hidden;border-radius:6px">
-          <img src="${a.cover}" alt="${a.title}" style="width:100%;height:100%;object-fit:cover"/>
-        </div>
-        <div>
-          <h4>${a.title}</h4>
-          <div class="meta">${band.name} · ${a.year}</div>
-          <div style="margin-top:8px">
-            <button class="btn view-tracks" data-album="${a.id}">Ver canciones</button>
-            <button class="btn add-all" data-album="${a.id}">Agregar todo a playlist</button>
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(node);
-  });
-
-  $all('.view-tracks').forEach(btn => {
-    btn.onclick = e => {
-      const albumId = e.currentTarget.dataset.album;
-      renderTracks(albumId);
-      document.getElementById('songs-section').scrollIntoView({behavior:'smooth'});
-    };
-  });
-
-  $all('.add-all').forEach(btn => {
-    btn.onclick = e => {
-      const albumId = e.currentTarget.dataset.album;
-      addAlbumToPlaylist(albumId);
-    };
-  });
-}
-
-function renderTracks(albumId) {
-  STATE.currentAlbumId = albumId;
-  const songsDiv = $('#songs-list');
-  songsDiv.innerHTML = '';
-  const album = STATE.albums.find(a => a.id === albumId);
-  if (!album) { songsDiv.innerHTML = `<div class="card">Álbum no encontrado</div>`; return; }
-  
-  // Limpiar reproductor anterior si existe
-  const oldPlayer = $('#youtube-player');
-  if (oldPlayer) oldPlayer.remove();
-
-  const band = STATE.bands.find(b => b.id === album.bandId);
-  const header = document.createElement('div');
-  header.className = 'card';
-  header.innerHTML = `
-    <div style="display:flex;gap:12px">
-      <div style="width:150px;height:100px;overflow:hidden;border-radius:6px"><img src="${album.cover}" style="width:100%;height:100%;object-fit:cover"/></div>
-      <div>
-        <h3>${album.title}</h3>
-        <div class="meta">${band.name} · ${album.year}</div>
-      </div>
-    </div>
-  `;
-  songsDiv.appendChild(header);
-
-  const listNode = document.createElement('div');
-  listNode.className = 'songs-list';
-  album.tracks.forEach(track => {
-    const trackNode = document.createElement('div');
-    trackNode.className = 'song card';
-    trackNode.innerHTML = `
-      <div class="info">
-        <div class="title">${track.title}</div>
-        <small>${formatDuration(track.duration)}</small>
-      </div>
-      <div class="actions">
-        <button class="btn play-track" data-track="${track.id}" data-album="${album.id}">▶</button>
-        <button class="btn add-track" data-track="${track.id}" data-album="${album.id}">+ playlist</button>
-      </div>
-    `;
-    listNode.appendChild(trackNode);
-  });
-  songsDiv.appendChild(listNode);
-
-  // Eventos
-  $all('.play-track').forEach(btn => btn.onclick = e => {
-    const trackId = e.currentTarget.dataset.track;
-    const albumId = e.currentTarget.dataset.album;
-    playTrack(albumId, trackId);
-  });
-  $all('.add-track').forEach(btn => btn.onclick = e => {
-    const trackId = e.currentTarget.dataset.track;
-    const albumId = e.currentTarget.dataset.album;
-    addTrackToPlaylist(albumId, trackId);
-  });
-}
-
-/* ------------------ PLAYLIST / PLAYER ------------------ */
-function formatDuration(sec) {
-  const m = Math.floor(sec/60), s = sec%60;
-  return `${m}:${s.toString().padStart(2,'0')}`;
-}
-
-function playTrack(albumId, trackId) {
-  const album = STATE.albums.find(a => a.id === albumId);
-  const track = album.tracks.find(t => t.id === trackId);
-  const band = STATE.bands.find(b => b.id === album.bandId);
-  
-  if (track.youtubeId) {
-    // Actualizar UI
-    $('#now-playing').textContent = `${track.title} — ${album.title} — ${band.name}`;
-    
-    // Crear o actualizar iframe de YouTube
-    const player = $('#youtube-player');
-    if (!player) {
-      const playerDiv = document.createElement('div');
-      playerDiv.innerHTML = `
-        <iframe
-          id="youtube-player"
-          src="https://www.youtube.com/embed/${track.youtubeId}?autoplay=1"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-        </iframe>
-      `;
-      $('.player').insertBefore(playerDiv, $('#now-playing').nextSibling);
-    } else {
-      player.src = `https://www.youtube.com/embed/${track.youtubeId}?autoplay=1`;
-    }
-    
-    STATE.isPlaying = true;
-  } else {
-    // Fallback para canciones sin YouTube
-    $('#now-playing').textContent = `${track.title} — ${album.title} — ${band.name} (No disponible en YouTube)`;
-  }
-  
-  updatePlayerButtons();
-}
-
-function hashCode(str) {
-  let h=0; for (let i=0;i<str.length;i++){ h = ((h<<5)-h) + str.charCodeAt(i); h |= 0; }
-  return h;
-}
-
-function ensureAudio() {
-  if (!STATE.audioContext) {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    STATE.audioContext = new AudioCtx();
-  }
-}
-
-function playTone(freq = 440, duration = 2, onended = null) {
-  ensureAudio();
-  stopTone();
-  const ctx = STATE.audioContext;
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(freq, ctx.currentTime);
-  gain.gain.setValueAtTime(0.18, ctx.currentTime);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
-  STATE.oscillator = osc;
-  STATE.gainNode = gain;
-  STATE.isPlaying = true;
-  setTimeout(() => { stopTone(); if(onended) onended(); }, duration*1000);
-}
-
-function stopTone() {
-  if (STATE.oscillator) {
-    try { STATE.oscillator.stop(); } catch(e){}
-    STATE.oscillator.disconnect?.();
-    STATE.gainNode?.disconnect?.();
-  }
-  STATE.isPlaying = false;
-  updateProgressUI(0);
-  updatePlayerButtons();
-}
-
-function updateProgressUI(pct=0){
-  $('#progress-bar').style.width = pct+'%';
-}
-
-function updatePlayerButtons(){
-  $('#play-btn').disabled = STATE.isPlaying;
-  $('#pause-btn').disabled = !STATE.isPlaying;
-  $('#stop-btn').disabled = !STATE.isPlaying;
+  console.log('✅ [app.js] Bandas renderizadas');
 }
 
 /* ------------------ EVENTOS / UI ------------------ */
 function bindUI() {
-  $('#band-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const form = e.target;
-    
-    // Crear nueva banda con datos básicos
-    const newBand = {
-      id: 'b' + Date.now(),
-      name: $('#band-name').value.trim(),
-      genre: $('#band-genre').value.trim(),
-      bio: $('#band-bio').value.trim(),
-      youtube: STATE.tempYoutubeLinks.map(link => ({
-        url: link.url,
-        videoId: link.videoId
-      }))
-    };
-    
-    // Validar campos obligatorios
-    if (!newBand.name || !newBand.genre) {
-      showToast('⚠️ Nombre y género son obligatorios', 'error');
-      return;
-    }
-    
-    // Procesar imagen si existe
-    const imgInput = $('#band-img');
-    if (imgInput.files[0]) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        newBand.img = e.target.result;
-        finalizeBandCreation(newBand);
+  console.log('⚙️ [app.js] Configurando eventos UI...');
+  
+  const bandForm = $('#band-form');
+  if (bandForm) {
+    bandForm.addEventListener('submit', e => {
+      e.preventDefault();
+      console.log('📝 [app.js] Formulario de banda enviado');
+      
+      const form = e.target;
+      
+      // ✅ Asegurar que tempYoutubeLinks existe
+      if (!Array.isArray(STATE.tempYoutubeLinks)) {
+        STATE.tempYoutubeLinks = [];
+      }
+      
+      // Crear nueva banda
+      const newBand = {
+        id: 'b' + Date.now(),
+        name: $('#band-name').value.trim(),
+        genre: $('#band-genre').value.trim(),
+        bio: $('#band-bio').value.trim(),
+        youtube: STATE.tempYoutubeLinks.map(link => ({
+          url: link.url,
+          videoId: link.videoId
+        }))
       };
-      reader.readAsDataURL(imgInput.files[0]);
-    } else {
-      finalizeBandCreation(newBand);
-    }
-  });
+      
+      console.log('📊 [app.js] Nueva banda:', newBand);
+      
+      // Validar
+      if (!newBand.name || !newBand.genre) {
+        showToast('⚠️ Nombre y género son obligatorios', 'error');
+        return;
+      }
+      
+      // Procesar imagen si existe
+      const imgInput = $('#band-img');
+      if (imgInput && imgInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          newBand.img = e.target.result;
+          finalizeBandCreation(newBand);
+        };
+        reader.readAsDataURL(imgInput.files[0]);
+      } else {
+        finalizeBandCreation(newBand);
+      }
+    });
+  }
   
   // Botón para agregar video de YouTube
-  $('#add-youtube').addEventListener('click', addYoutubeLink);
+  const addYoutubeBtn = $('#add-youtube');
+  if (addYoutubeBtn) {
+    addYoutubeBtn.addEventListener('click', addYoutubeLink);
+    console.log('✅ [app.js] Botón de YouTube configurado');
+  }
   
-  $('#search-input').addEventListener('input', debounce(()=>applySearchAndFilter(),250));
-  $('#genre-filter').addEventListener('change', applySearchAndFilter);
-  $('#clear-search').addEventListener('click', ()=>{ 
-    $('#search-input').value=''; 
-    $('#genre-filter').value=''; 
-    renderBands(); 
-    renderAlbums(); 
-  });
+  // Búsqueda y filtros
+  const searchInput = $('#search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', debounce(() => applySearchAndFilter(), 250));
+  }
+  
+  const genreFilter = $('#genre-filter');
+  if (genreFilter) {
+    genreFilter.addEventListener('change', applySearchAndFilter);
+  }
+  
+  const clearSearch = $('#clear-search');
+  if (clearSearch) {
+    clearSearch.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (genreFilter) genreFilter.value = '';
+      renderBands();
+    });
+  }
+  
+  console.log('✅ [app.js] Eventos UI configurados');
 }
 
 function finalizeBandCreation(newBand) {
-  // Agregar banda al estado
+  console.log('✅ [app.js] Finalizando creación de banda...');
+  
+  // Agregar banda
   STATE.bands.push(newBand);
   STATE.genres.add(newBand.genre);
   
-  // Guardar en localStorage
+  // Guardar
   saveBandsToLocalStorage();
   
-  // Limpiar formulario y links temporales
-  $('#band-form').reset();
-  $('#preview-img').classList.add('hidden');
+  // Limpiar formulario
+  const form = $('#band-form');
+  if (form) form.reset();
+  
+  const preview = $('#preview-img');
+  if (preview) preview.classList.add('hidden');
+  
+  // Limpiar links de YouTube
   STATE.tempYoutubeLinks = [];
   renderYoutubeLinks();
   
@@ -657,21 +477,47 @@ function finalizeBandCreation(newBand) {
   renderBands();
   
   showToast(`✅ Banda "${newBand.name}" agregada exitosamente`);
+  console.log('✅ [app.js] Banda creada exitosamente');
 }
 
-function applySearchAndFilter(){
-  renderBands($('#search-input').value, $('#genre-filter').value);
+function applySearchAndFilter() {
+  const searchInput = $('#search-input');
+  const genreFilter = $('#genre-filter');
+  
+  renderBands(
+    searchInput ? searchInput.value : '',
+    genreFilter ? genreFilter.value : ''
+  );
 }
 
-function debounce(fn, ms=200){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms);} }
+function debounce(fn, ms = 200) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
 
 /* ------------------ INICIO ------------------ */
-async function bootstrap(){
-  await loadData();
-  renderGenres();
-  renderBands();
-  renderAlbums();
-  bindUI();
+async function bootstrap() {
+  console.log('🚀 [app.js] Bootstrap iniciando...');
+  
+  try {
+    await loadData();
+    renderGenres();
+    renderBands();
+    bindUI();
+    
+    console.log('✅ [app.js] Bootstrap completado');
+  } catch (error) {
+    console.error('❌ [app.js] Error en bootstrap:', error);
+  }
 }
 
+// Exponer funciones globales necesarias
+window.removeYoutubeLink = removeYoutubeLink;
+window.deleteBand = deleteBand;
+
 bootstrap();
+
+console.log('✅ [app.js] Inicialización completa');

@@ -181,72 +181,522 @@ body{background:linear-gradient(180deg,#071126 0%, #081324 100%);color:#e6eef6;m
 }
 
 /* Mejorar el reproductor */
+/* ============================================
+   REPRODUCTOR DE AUDIO - ESTILOS
+   Agregar estos estilos a styles.css
+   ============================================ */
+
+/* Ocultar el iframe de YouTube completamente */
+#youtube-player {
+    width: 1px !important;
+    height: 1px !important;
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* Contenedor principal del reproductor */
+.player-container {
+    background: linear-gradient(135deg, var(--card) 0%, rgba(18,21,28,0.8) 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
 .player {
-  margin-top: 30px;
-  padding: 20px;
-  background: var(--glass);
-  border-radius: 16px;
-  border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .player h3 {
-  color: var(--accent);
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    color: var(--accent);
+    font-size: 1.3rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .player h3::before {
-  content: '🎵';
+    content: "🎵";
+    font-size: 1.5rem;
 }
 
-#now-playing {
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  padding: 10px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
+/* Tarjeta de "Reproduciendo ahora" */
+.now-playing-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: rgba(255,167,38,0.05);
+    border-radius: 12px;
+    border-left: 4px solid var(--accent);
+    min-height: 80px;
 }
 
+.now-playing-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.now-playing-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.track-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-meta {
+    font-size: 0.9rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Animación de reproducción */
+.playing-animation {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 24px;
+}
+
+.playing-animation span {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: playing 0.8s ease-in-out infinite;
+}
+
+.playing-animation span:nth-child(1) {
+    height: 8px;
+    animation-delay: 0s;
+}
+
+.playing-animation span:nth-child(2) {
+    height: 16px;
+    animation-delay: 0.2s;
+}
+
+.playing-animation span:nth-child(3) {
+    height: 12px;
+    animation-delay: 0.4s;
+}
+
+@keyframes playing {
+    0%, 100% {
+        height: 8px;
+    }
+    50% {
+        height: 20px;
+    }
+}
+
+/* Controles del reproductor */
 .player-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
 }
 
 .player-controls button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent);
-  color: #000;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--accent);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
 .player-controls button:hover:not(:disabled) {
-  background: var(--accent-dark);
-  transform: translateY(-2px);
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 4px 20px rgba(255,167,38,0.4);
 }
 
 .player-controls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: scale(0.95);
 }
 
+.player-controls button:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+/* Botones específicos */
+#play-btn::after {
+    content: "▶️";
+}
+
+#pause-btn::after {
+    content: "⏸️";
+}
+
+#stop-btn::after {
+    content: "⏹️";
+}
+
+/* Barra de progreso mejorada */
 .progress {
-  height: 8px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-  overflow: hidden;
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.progress::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.05), 
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 #progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
-  transition: width 0.1s linear;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+    border-radius: 999px;
+    transition: width 0.1s linear;
+    position: relative;
+    box-shadow: 0 0 10px rgba(255,167,38,0.5);
+}
+
+#progress-bar::after {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255,167,38,0.8);
+}
+
+/* Indicador de buffering */
+.buffering-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: rgba(255,167,38,0.1);
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-left: 12px;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Lista de canciones mejorada */
+.songs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.song {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.song:hover {
+    transform: translateX(8px);
+    border-color: var(--accent);
+    background: rgba(255,167,38,0.08);
+}
+
+/* Canción actualmente reproduciendo */
+.song.playing {
+    background: linear-gradient(90deg, 
+        rgba(255,167,38,0.15), 
+        rgba(255,167,38,0.05)
+    );
+    border-left: 4px solid var(--accent);
+    padding-left: 12px;
+}
+
+.song.playing .title::before {
+    content: "🎵 ";
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.song .info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.song .title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+.song .duration {
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.song .duration::before {
+    content: "⏱️";
+}
+
+.song .actions {
+    display: flex;
+    gap: 8px;
+}
+
+.song .btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--glass);
+    border: 2px solid var(--border);
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.song .btn:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    transform: scale(1.15);
+}
+
+.song .btn.play {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-color: var(--accent);
+    color: #000;
+}
+
+/* Toast notifications mejoradas */
+.toast {
+    background: linear-gradient(135deg, #2b7a78, #1d5c5a);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    border-left: 4px solid var(--accent);
+    opacity: 0;
+    transform: translateX(60px);
+    animation: slideIn 0.4s forwards, fadeOut 0.4s ease 3.5s forwards;
+}
+
+.toast.error {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    border-left-color: #ff5252;
+}
+
+.toast.success {
+    background: linear-gradient(135deg, #388e3c, #2e7d32);
+    border-left-color: #4caf50;
+}
+
+.toast.info {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    border-left-color: #2196f3;
+}
+
+/* Estados vacíos */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+}
+
+.empty-state::before {
+    content: "🎵";
+    display: block;
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .player-container {
+        padding: 16px;
+    }
+    
+    .now-playing-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .now-playing-icon {
+        font-size: 2rem;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .player-controls button {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+    
+    .song {
+        padding: 10px 12px;
+    }
+    
+    .song:hover {
+        transform: translateX(4px);
+    }
+}
+
+/* Scroll personalizado para listas largas */
+.songs-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.songs-list::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.02);
+    border-radius: 4px;
+}
+
+.songs-list::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+.songs-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-dark);
+}
+
+/* Animación de carga */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.song {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Estados de botones */
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.btn.loading::after {
+    content: "⏳";
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Mejoras de accesibilidad */
+.player-controls button:focus,
+.song .btn:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Efecto de ondas al hacer clic */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transform: scale(0);
+    animation: ripple-effect 0.6s ease-out;
+}
+
+@keyframes ripple-effect {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 .panel{background:var(--card);padding:12px;border-radius:10px;border:1px solid var(--glass)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
@@ -1196,3 +1646,86 @@ body{background:linear-gradient(180deg,#071126 0%, #081324 100%);color:#e6eef6;m
 @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { to { opacity: 0; transform: translateX(40px); } }
 
+/* ============================================
+   ANIMACIONES PARA MODAL
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* AGREGAR AL FINAL DE styles.css */
+
+/* ============================================
+   OCULTAR COMPLETAMENTE EL IFRAME DE YOUTUBE
+   ============================================ */
+
+#youtube-player {
+    width: 1px !important;
+    height: 1px !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    display: block !important;
+}
+
+/* Contenedor del player - NO mostrar iframe */
+#player-container {
+    position: relative;
+}
+
+#player-container iframe {
+    width: 1px !important;
+    height: 1px !important;
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+```
+
+## 📋 Resumen de Cambios
+
+### ✅ Arreglado en `app.js`:
+1. **Línea 71** - Verificación de `tempYoutubeLinks` antes de usar `.map()`
+2. **Inicialización** - `tempYoutubeLinks: []` en STATE desde el inicio
+3. **Verificaciones** - Checar que es array antes de usarlo
+4. **Más logs** - Para tracking de errores
+
+### ✅ Para Ocultar el Video:
+Agrega esos estilos CSS al **FINAL** de `styles.css`
+
+## 🎯 Pasos Finales:
+
+1. **Reemplaza** `app.js` con este nuevo código
+2. **Agrega** los estilos CSS al final de `styles.css`
+3. **Recarga** la página con Ctrl+F5 (hard refresh)
+4. **Prueba** con videos que NO estén bloqueados
+
+## 🎵 Videos de Prueba que SÍ Funcionan:
+```
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://www.youtube.com/watch?v=9bZkp7q19f0
+https://www.youtube.com/watch?v=kJQP7kiw5Fk

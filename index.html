@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>La Disquera — Heavy Metal Edition</title>
+  <title>La Disquera — Gestor Musical</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <h1>La Disquera</h1>
+    <h1>🎸 La Disquera</h1>
     <div class="controls">
       <input id="search-input" type="search" placeholder="Buscar banda, álbum o canción..." />
       <select id="genre-filter">
@@ -20,7 +20,7 @@
 
   <main class="layout">
     <!-- PANEL DE BANDAS -->
-     <section id="bands-section" class="section panel bandas active">
+    <section id="bands-section" class="section panel bandas active">
       <h2>Bandas</h2>
 
       <div class="card" id="new-band-form">
@@ -29,11 +29,11 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="band-name">Nombre de la banda</label>
-              <input id="band-name" type="text" required />
+              <input id="band-name" type="text" required autocomplete="off" />
             </div>
             <div class="form-group">
               <label for="band-genre">Género musical</label>
-              <input id="band-genre" type="text" required />
+              <input id="band-genre" type="text" required autocomplete="off" />
             </div>
           </div>
 
@@ -48,11 +48,10 @@
             <img id="preview-img" src="" alt="Vista previa" class="preview hidden" />
           </div>
 
-          <!-- Nueva sección de YouTube -->
           <div class="youtube-section">
             <h4>Agregar canciones desde YouTube</h4>
             <div class="youtube-input">
-              <input type="text" id="youtube-url" placeholder="Pegar link de YouTube aquí..." />
+              <input type="text" id="youtube-url" placeholder="Pegar link de YouTube aquí..." autocomplete="off" />
               <button type="button" class="btn" id="add-youtube">Agregar</button>
             </div>
             <div id="youtube-list"></div>
@@ -74,56 +73,65 @@
     <!-- PANEL DE CANCIONES -->
     <section id="songs-section" class="section panel canciones">
       <h2>Canciones</h2>
-      <div class="canciones-section">
-        <!-- Aquí se mostrarán las canciones del álbum -->
-      </div>
-
-      <div class="player card">
-        <h3>Reproductor (sintético)</h3>
-        <div id="now-playing">Nada sonando</div>
-        <div class="player-controls">
-          <button id="play-btn" disabled>Play</button>
-          <button id="pause-btn" disabled>Pause</button>
-          <button id="stop-btn" disabled>Stop</button>
-        </div>
-        <div class="progress">
-          <div id="progress-bar"></div>
-        </div>
-      </div>
-
-      <div class="playlist card">
-        <h3>Playlist (guardada)</h3>
-        <ul id="playlist"></ul>
-        <div class="playlist-actions">
-          <button id="save-playlist">Guardar playlist</button>
-          <button id="clear-playlist">Vaciar playlist</button>
-        </div>
-      </div>
+      <div id="songs-list"></div>
     </section>
   </main>
 
   <footer class="footer">
-    <small>Proyecto final — Rúbrica JavaScript Flex — Autor: Lucas Alvarez</small>
+    <small>Proyecto final — JavaScript CoderHouse — Autor: Lucas Alvarez</small>
   </footer>
 
-  <!-- API de YouTube -->
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- ============================================
+       SCRIPTS - ORDEN DE CARGA IMPORTANTE
+       ============================================ -->
+  
+  <!-- 1. API de YouTube (debe cargarse primero) -->
   <script src="https://www.youtube.com/iframe_api"></script>
   
+  <!-- 2. Script principal de app.js (gestión de bandas) -->
   <script src="app.js"></script>
-  <script src="script/modules/albums.js"></script>
+  
+  <!-- 3. Módulos de álbumes (en orden de dependencias) -->
+  <script src="script/modules/albums-core.js"></script>
+  <script src="script/modules/youtube-utils.js"></script>
+  <script src="script/modules/albums-form.js"></script>
+  <script src="script/modules/albums-save.js"></script>
+  <script src="script/modules/albums-render.js"></script>
+  <script src="script/modules/player-audio.js"></script>
+  <script src="script/modules/playlist-manager.js"></script>
+  
+  <!-- 4. Inicialización principal (debe ser el último) -->
+  <script src="script/modules/albums-main.js"></script>
+  
+  <!-- 5. Callback de YouTube API -->
   <script>
-    // Inicialización después de cargar todos los scripts
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM loaded, initializing app...');
-      if (typeof window.STATE === 'undefined') {
-        console.error('STATE no está definido');
-      }
-    });
-
+    console.log('🎬 [index.html] Scripts cargados');
+    
     // Función requerida por la API de YouTube
     function onYouTubeIframeAPIReady() {
-      console.log('YouTube API Ready');
+      console.log('✅ [YouTube API] API lista');
+      if (window.youtubeUtils && window.youtubeUtils.onAPIReady) {
+        window.youtubeUtils.onAPIReady();
+      }
     }
+    
+    // Log de inicialización
+    window.addEventListener('load', () => {
+      console.log('✅ [index.html] Página completamente cargada');
+      console.log('📊 [index.html] Módulos disponibles:', {
+        albumsCore: !!window.albumsCore,
+        albumsForm: !!window.albumsForm,
+        albumsSave: !!window.albumsSave,
+        albumsRender: !!window.albumsRender,
+        youtubeUtils: !!window.youtubeUtils,
+        playerAudio: !!window.playerAudio,
+        playlistManager: !!window.playlistManager,
+        albumsApp: !!window.albumsApp
+      });
+    });
   </script>
 </body>
 </html>
