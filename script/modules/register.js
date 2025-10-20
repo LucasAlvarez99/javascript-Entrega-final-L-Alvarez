@@ -1,96 +1,131 @@
 /**
- * =======================================
- *  REGISTER MODULE - Proyecto Final L. Álvarez
- * =======================================
- * 
- * Funcionalidad:
- *  - Crea nuevos usuarios a partir del formulario de registro
- *  - Valida campos, contraseñas y duplicados
- *  - Guarda los datos en localStorage o login.json (si existe backend)
- *  - Redirige al login tras el registro exitoso
- * 
- * Dependencias:
- *   AppStorage (script/core/storage.js)
+ * ===============================================
+ * REGISTER.JS - Lógica del registro
+ * Proyecto Final - Lucas Alvarez
+ * ===============================================
  */
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("registerForm");
-  const msg = document.getElementById("registerMsg");
+(function() {
+  'use strict';
 
-  if (!form) return;
+  // ========== ELEMENTOS DOM ==========
+  const form = document.getElementById('registerForm');
+  const nameInput = document.getElementById('regName');
+  const usernameInput = document.getElementById('regUsername');
+  const emailInput = document.getElementById('regEmail');
+  const passwordInput = document.getElementById('regPassword');
+  const confirmInput = document.getElementById('regConfirm');
+  const errorMsg = document.getElementById('registerError');
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.textContent = "";
-    msg.style.color = "#ff4d4d";
+  // ========== INICIALIZACIÓN ==========
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('📝 Inicializando registro...');
+    
+    // Configurar eventos
+    setupEventListeners();
+    
+    console.log('✅ Registro inicializado');
+  });
 
-    const name = form.name.value.trim();
-    const username = form.username.value.trim();
-    const email = form.email.value.trim();
-    const password = form.password.value.trim();
-    const confirm = form.confirm.value.trim();
-
-    // === Validaciones ===
-    if (!name || !username || !email || !password || !confirm) {
-      msg.textContent = "Todos los campos son obligatorios.";
-      return;
-    }
-
-    if (password.length < 6) {
-      msg.textContent = "La contraseña debe tener al menos 6 caracteres.";
-      return;
-    }
-
-    if (password !== confirm) {
-      msg.textContent = "Las contraseñas no coinciden.";
-      return;
-    }
-
-    // === Leer usuarios existentes ===
-    let users = [];
-
-    try {
-      // Primero intentamos cargar desde login.json (si existe)
-      const res = await fetch("../data/login.json");
-      if (res.ok) {
-        users = await res.json();
+  // ========== EVENT LISTENERS ==========
+  function setupEventListeners() {
+    form.addEventListener('submit', handleRegister);
+    
+    // Validación en tiempo real
+    emailInput.addEventListener('blur', () => {
+      if (emailInput.value && !AppHelpers.validateEmail(emailInput.value)) {
+        showError('Email inválido');
       } else {
-        // Si no se puede leer, usar localStorage como fallback
-        users = AppStorage.getUsers() || [];
+        errorMsg.textContent = '';
       }
-    } catch {
-      users = AppStorage.getUsers() || [];
-    }
+    });
+    
+    confirmInput.addEventListener('input', () => {
+      if (confirmInput.value && confirmInput.value !== passwordInput.value) {
+        showError('Las contraseñas no coinciden');
+      } else {
+        errorMsg.textContent = '';
+      }
+    });
+  }
 
-    // === Validar duplicados ===
-    const exists = users.some(
-      (u) => u.username === username || u.email === email
-    );
-    if (exists) {
-      msg.textContent = "El usuario o correo ya están registrados.";
+  // ========== MANEJAR REGISTRO ==========
+  function handleRegister(e) {
+    e.preventDefault();
+    errorMsg.textContent = '';
+    
+    const name = nameInput.value.trim();
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirm = confirmInput.value;
+    
+    console.log('📝 Intentando registrar:', email);
+    
+    // Validaciones
+    if (!name || !username || !email || !password || !confirm) {
+      showError('Por favor completá todos los campos');
       return;
     }
-
-    // === Crear nuevo usuario ===
+    
+    if (!AppHelpers.validateEmail(email)) {
+      showError('Email inválido');
+      return;
+    }
+    
+    if (!AppHelpers.validateUsername(username)) {
+      showError('El usuario debe tener al menos 3 caracteres');
+      return;
+    }
+    
+    if (!AppHelpers.validatePassword(password)) {
+      showError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    if (password !== confirm) {
+      showError('Las contraseñas no coinciden');
+      return;
+    }
+    
+    // Crear usuario
     const newUser = {
-      id: Date.now(),
       name,
       username,
       email,
       password,
-      role: "user",
+      role: 'user'
     };
+    
+    const success = AppStorage.addUser(newUser);
+    
+    if (!success) {
+      showError('El email o usuario ya están registrados');
+      return;
+    }
+    
+    // Registro exitoso
+    console.log('✅ Usuario registrado:', email);
+    showSuccess('✓ Cuenta creada exitosamente');
+    
+    // Limpiar formulario
+    form.reset();
+    
+    // Redirigir al login
+    AppHelpers.showToast('Usuario registrado correctamente. Redirigiendo al login...', 'success');
+    AppHelpers.redirect('../index.html', 2000);
+  }
 
-    users.push(newUser);
+  // ========== MENSAJES ==========
+  function showError(message) {
+    errorMsg.textContent = message;
+    errorMsg.style.color = 'var(--error)';
+  }
 
-    // Guardar en localStorage
-    AppStorage.setUsers(users);
+  function showSuccess(message) {
+    errorMsg.textContent = message;
+    errorMsg.style.color = 'var(--success)';
+  }
 
-    msg.style.color = "green";
-    msg.textContent = "Usuario registrado correctamente. Redirigiendo...";
-
-    setTimeout(() => {
-      window.location.href = "../index.html";
-    }, 1500);
-  });
-});
+  console.log('✅ Módulo register cargado');
+})();

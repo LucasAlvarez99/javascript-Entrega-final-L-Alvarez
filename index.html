@@ -3,62 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Inicio de sesión - Proyecto Final L. Álvarez">
-  <title>Iniciar sesión | Proyecto L. Álvarez</title>
-  
-  <!-- Tipografía profesional -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  
-  <!-- Estilos principales -->
+  <title>Login | Game Store - L. Álvarez</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-  <!-- HEADER GLOBAL -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="container header-container">
-      <div class="logo">Proyecto L. Álvarez</div>
-      <nav class="nav-links">
-        <a href="#" class="active">Login</a>
-        <a href="pages/register.html">Registrarse</a>
-        <a href="pages/home.html">Inicio</a>
-      </nav>
+      <div class="logo">🎮 Game Store</div>
+      <button id="themeToggle" class="btn-theme" aria-label="Cambiar tema">
+        <span id="themeIcon">☀️</span>
+      </button>
     </div>
   </header>
 
   <!-- MAIN -->
   <main class="main-content">
-    <section class="login-section">
-      <h1>Iniciar sesión</h1>
-      <p class="login-subtitle">Accedé con tu usuario y contraseña</p>
-      
-      <!-- Formulario accesible -->
-      <form id="loginForm" class="login-form" novalidate>
-        <div class="form-group">
-          <label for="username">Usuario</label>
-          <input type="text" id="username" name="username" placeholder="Tu usuario" required aria-required="true">
+    <section class="auth-container">
+      <div class="auth-section active">
+        <h1>Iniciar sesión</h1>
+        <p class="subtitle">Accedé con tu cuenta</p>
+        
+        <!-- ESTADÍSTICAS DE USUARIOS -->
+        <div class="user-stats">
+          <p id="userStats">👥 Usuarios: 0 | 👑 Admins: 0</p>
         </div>
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" name="password" placeholder="Tu contraseña" required aria-required="true">
-        </div>
-        <button type="submit" class="btn-login">Ingresar</button>
-      </form>
 
-      <!-- Mensaje de error dinámico -->
-      <p id="loginError" class="login-error" aria-live="polite"></p>
+        <!-- BUSCADOR DE USUARIOS -->
+        <div class="form-group">
+          <label for="searchUsers">🔍 Buscar usuario</label>
+          <input 
+            type="text" 
+            id="searchUsers" 
+            placeholder="Buscar por email o nombre..."
+            class="form-control"
+          >
+        </div>
+
+        <!-- DROPDOWN DE USUARIOS -->
+        <div class="form-group">
+          <label for="userSelect">👤 Usuarios registrados</label>
+          <select id="userSelect" class="form-control">
+            <option value="">-- Seleccionar usuario --</option>
+          </select>
+        </div>
+
+        <!-- FORMULARIO DE LOGIN -->
+        <form id="loginForm" class="auth-form">
+          <div class="form-group">
+            <label for="loginEmail">📧 Email</label>
+            <input 
+              type="email" 
+              id="loginEmail" 
+              placeholder="tu@email.com" 
+              required 
+              autocomplete="email"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="loginPassword">🔑 Contraseña</label>
+            <input 
+              type="password" 
+              id="loginPassword" 
+              placeholder="Tu contraseña" 
+              required 
+              autocomplete="current-password"
+            >
+          </div>
+          
+          <button type="submit" class="btn-primary">Ingresar</button>
+          
+          <!-- BOTÓN LOGIN RÁPIDO -->
+          <button 
+            type="button" 
+            id="quickLoginBtn" 
+            class="btn-secondary" 
+            style="display: none; margin-top: 0.5rem;"
+          >
+            ⚡ Acceso Rápido
+          </button>
+          
+          <p id="loginError" class="error-msg"></p>
+        </form>
+
+        <!-- ENLACES -->
+        <div class="auth-switch">
+          <p>¿No tenés cuenta? <a href="pages/register.html" class="link-btn">Registrate acá</a></p>
+        </div>
+
+        <!-- CREDENCIALES DE PRUEBA -->
+        <div class="demo-credentials">
+          <p><strong>💡 Tip:</strong> Seleccioná un usuario del dropdown y usá "Acceso Rápido"</p>
+          <p>O ingresá manualmente:</p>
+          <p>👤 Email: <code>admin@gamestore.com</code></p>
+          <p>🔑 Contraseña: <code>admin123</code></p>
+        </div>
+      </div>
     </section>
   </main>
 
-  <!-- FOOTER GLOBAL -->
+  <!-- FOOTER -->
   <footer class="site-footer">
-    <div class="container footer-container">
-      <p>© 2025 Proyecto Final - Lucas Álvarez</p>
-      <p>Desarrollado con dedicación por un programador full stack</p>
+    <div class="container">
+      <p>© 2025 Game Store - Lucas Álvarez | Proyecto Final JavaScript</p>
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="script/core/main.js"></script>
+  <!-- SCRIPTS -->
+  <script src="script/core/storage.js"></script>
+  <script src="script/core/helpers.js"></script>
+  <script src="script/core/global.js"></script>
   <script src="script/modules/login.js"></script>
 </body>
 </html>

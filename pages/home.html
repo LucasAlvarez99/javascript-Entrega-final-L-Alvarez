@@ -1,69 +1,137 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Catálogo de productos - Proyecto Final L. Álvarez" />
-  <title>Inicio | Proyecto L. Álvarez</title>
-
-  <!-- Tipografía y estilos -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda | Game Store - L. Álvarez</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/style.css">
 </head>
-
 <body>
-  <!-- HEADER GLOBAL -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="container header-container">
-      <div class="logo">Proyecto L. Álvarez</div>
-      <nav class="nav-links">
-        <a href="../index.html">Login</a>
-        <a href="register.html">Registrarse</a>
-        <a href="#" class="active">Inicio</a>
+      <div class="logo">🎮 Game Store</div>
+      
+      <nav class="header-nav">
+        <div id="dolarInfo" class="dolar-badge">💵 Cargando...</div>
+        <button id="currencyToggle" class="btn-currency">💵 USD</button>
+        <button id="themeToggle" class="btn-theme" aria-label="Cambiar tema">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <button id="cartBtn" class="btn-cart">
+          🛒 <span id="cartCount">0</span>
+        </button>
+        <button id="profileBtn" class="btn-profile">👤</button>
+        <span id="userName" class="user-name"></span>
+        <button id="logoutBtn" class="btn-logout">Salir</button>
       </nav>
     </div>
   </header>
 
   <!-- MAIN -->
-  <main class="main-content">
-    <section class="products-section container">
-      <h1 class="section-title">Nuestros productos</h1>
-      <p class="section-subtitle">Calidad y frescura garantizada</p>
+  <main class="main-content-page">
+    <div class="container">
+      
+      <!-- PANEL ADMIN -->
+      <section id="adminPanel" class="admin-panel" style="display: none;">
+        <h2>🔧 Panel de Administrador</h2>
+        <button id="toggleAddProduct" class="btn-secondary">➕ Agregar nuevo juego</button>
+        
+        <div id="addProductForm" class="add-product-form" style="display: none;">
+          <form id="productForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="prodName">Nombre del juego</label>
+                <input type="text" id="prodName" required>
+              </div>
+              <div class="form-group">
+                <label for="prodPrice">Precio (USD)</label>
+                <input type="number" id="prodPrice" step="0.01" min="0" required>
+              </div>
+            </div>
 
-      <!-- BUSCADOR -->
-      <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Buscar producto..." aria-label="Buscar producto" />
-        <button id="searchBtn" class="btn-search">Buscar</button>
-      </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="prodCategory">Categoría</label>
+                <input type="text" id="prodCategory" placeholder="Ej: Acción / Aventura" required>
+              </div>
+              <div class="form-group">
+                <label for="prodDev">Desarrollador</label>
+                <input type="text" id="prodDev" required>
+              </div>
+            </div>
 
-      <!-- GRID DE PRODUCTOS -->
-      <div id="productGrid" class="product-grid">
-        <!-- Las tarjetas se renderizan dinámicamente con JS -->
-        <!-- Ejemplo de estructura generada:
-        <article class="product-card">
-          <img src="../assets/example.jpg" alt="Nombre del producto">
-          <div class="card-body">
-            <h3>Nombre del producto</h3>
-            <p>$Precio</p>
-            <button class="btn-add">Agregar al carrito</button>
-          </div>
-        </article>
-        -->
-      </div>
-    </section>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="prodRelease">Año de lanzamiento</label>
+                <input type="text" id="prodRelease" placeholder="2025" required>
+              </div>
+              <div class="form-group">
+                <label for="prodImage">URL de imagen</label>
+                <input type="text" id="prodImage" placeholder="assets/juego.png" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="prodDesc">Descripción</label>
+              <textarea id="prodDesc" rows="3" required></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary">✅ Agregar producto</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- CATÁLOGO -->
+      <section class="products-section">
+        <h1>Catálogo de Videojuegos</h1>
+        <p class="subtitle">Descubrí los mejores títulos</p>
+
+        <!-- BUSCADOR -->
+        <div class="filter-bar">
+          <input type="text" id="searchInput" placeholder="🔍 Buscar juego..." class="search-input">
+        </div>
+
+        <!-- CATEGORÍAS -->
+        <div id="categoriesContainer" class="categories-container"></div>
+
+        <!-- GRID DE PRODUCTOS -->
+        <div id="productsGrid" class="products-grid"></div>
+      </section>
+
+    </div>
   </main>
 
-  <!-- FOOTER GLOBAL -->
+  <!-- MODAL CARRITO -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🛒 Carrito de Compras</h2>
+        <button class="modal-close" id="closeCartBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="cartItems"></div>
+        <div class="cart-total">
+          <h3>Total: <span id="cartTotal">$0</span></h3>
+          <button id="clearCart" class="btn-secondary">🗑️ Vaciar carrito</button>
+          <button id="checkoutBtn" class="btn-primary">✅ Finalizar compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
   <footer class="site-footer">
-    <div class="container footer-container">
-      <p>© 2025 Proyecto Final - Lucas Álvarez</p>
-      <p>Desarrollado con dedicación por un programador full stack</p>
+    <div class="container">
+      <p>© 2025 Game Store - Lucas Álvarez | Proyecto Final JavaScript</p>
     </div>
   </footer>
 
   <!-- SCRIPTS -->
-  <script src="../script/core/main.js"></script>
-  <script src="../script/modules/uiRenderer.js"></script>
+  <script src="../script/core/storage.js"></script>
+  <script src="../script/core/helpers.js"></script>
+  <script src="../script/core/global.js"></script>
   <script src="../script/modules/home.js"></script>
 </body>
 </html>
