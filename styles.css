@@ -1,0 +1,1198 @@
+:root {
+  --bg: #0a0d14;
+  --card: #12151c;
+  --accent: #ffa726;
+  --accent-dark: #f57c00;
+  --muted: #9aa4b2;
+  --error: #ff5252;
+  --success: #4caf50;
+  --glass: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.08);
+  --modal-bg: rgba(0,0,0,0.8);
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial;margin:0;padding:0}
+body{background:linear-gradient(180deg,#071126 0%, #081324 100%);color:#e6eef6;min-height:100vh;display:flex;flex-direction:column}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px)}
+.topbar h1{font-size:1.5rem;color:var(--accent)}
+.controls{display:flex;gap:8px;align-items:center}
+.controls input, .controls select{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:var(--card);color:inherit}
+.controls button{padding:8px 10px;border-radius:8px;background:var(--accent);border:none;color:#041018;cursor:pointer}
+
+.layout{display:grid;grid-template-columns:1fr 1fr 420px;gap:18px;padding:20px;flex:1}
+
+/* Manejo de secciones */
+.panel {
+  display: block; /* Mostrar todos los paneles por defecto */
+}
+
+/* Estilos mejorados para la sección de canciones */
+.canciones-section {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.album-header {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 30px;
+  padding: 24px;
+  background: linear-gradient(to right, var(--accent-dark), var(--accent));
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Overlay para mejor contraste */
+.album-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(0,0,0,0.4), transparent);
+  z-index: 1;
+}
+
+.album-cover {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 2;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.album-info {
+  flex: 1;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.album-info h3 {
+  margin: 0 0 8px 0;
+  color: #fff;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.album-info p {
+  color: rgba(255,255,255,0.9);
+  font-size: 1.1rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.album-info p::before {
+  content: '💿';
+  font-size: 1.2em;
+}
+
+.songs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.song {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.song:hover {
+  transform: translateX(8px);
+  border-color: var(--accent);
+  background: rgba(255,167,38,0.1);
+}
+
+.song .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.song .title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.song .duration {
+  font-size: 0.9rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.song .duration::before {
+  content: '⏱️';
+  font-size: 1em;
+}
+
+.song .actions {
+  display: flex;
+  gap: 12px;
+}
+
+.song .btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--glass);
+  border: 2px solid var(--border);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.2rem;
+}
+
+.song .btn:hover {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+.song .btn.play::before {
+  content: '▶️';
+}
+
+.song .btn.add::before {
+  content: '➕';
+}
+
+/* Mejorar el reproductor */
+.player {
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--glass);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.player h3 {
+  color: var(--accent);
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player h3::before {
+  content: '🎵';
+}
+
+#now-playing {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+.player-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.player-controls button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.player-controls button:hover:not(:disabled) {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+}
+
+.player-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.progress {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  transition: width 0.1s linear;
+}
+.panel{background:var(--card);padding:12px;border-radius:10px;border:1px solid var(--glass)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+.band, .album{display:flex;flex-direction:column;gap:8px}
+.thumb{height:110px;background:#061425;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600}
+.band h3, .album h4{font-size:0.95rem;margin:0}
+.meta{font-size:0.82rem;color:var(--muted)}
+.btn{padding:6px 8px;border-radius:6px;border:none;background:var(--accent);color:#041018;cursor:pointer}
+.songs-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.song{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:6px;background:rgba(255,255,255,0.015)}
+.song .info{display:flex;flex-direction:column}
+.song .title{font-weight:600}
+.song small{color:var(--muted)}
+.song .actions{display:flex;gap:8px}
+.player{margin-top:12px}
+
+/* Formulario de álbum */
+/* Estructura básica del álbum */
+.albums-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Estilos mejorados del formulario de álbum */
+.album-form {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+}
+
+.album-form-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.album-form-header h3 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  margin: 0 0 8px 0;
+}
+
+.band-info {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(255,167,38,0.1);
+}
+
+/* Sección de canciones */
+.songs-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.songs-section h4 {
+  color: #fff;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+
+.url-input-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.input-with-icon {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.yt-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1.2rem;
+}
+
+.url-input-group input {
+  flex: 1;
+  padding: 12px 12px 12px 40px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.btn-add-song {
+  padding: 0 20px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-song:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.status-message {
+  text-align: center;
+  padding: 32px;
+  background: var(--bg);
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.status-message i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.status-message p {
+  margin: 0;
+}
+
+.status-message small {
+  opacity: 0.7;
+}
+
+.form-actions {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-save {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-save:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+}
+
+.btn-cancel {
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Formulario simple de álbum */
+.album-form {
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+}
+
+/* Formulario de álbum mejorado */
+.album-form {
+  background: var(--card);
+  width: 100%;
+  max-width: 600px;
+  margin: 20px;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  overflow: hidden;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .album-form {
+  transform: translateY(0);
+}
+
+.album-header {
+  background: linear-gradient(to right, var(--accent-dark), var(--accent));
+  padding: 20px;
+  position: relative;
+}
+
+.album-header h3 {
+  color: #000;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.album-header h3::before {
+  content: "💿";
+  font-size: 1.6rem;
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.2);
+  border: none;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.close-modal:hover {
+  background: rgba(0,0,0,0.4);
+  transform: scale(1.1);
+}
+
+/* Formulario simple y directo */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #fff;
+}
+
+/* Layout de dos columnas */
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,167,38,0.1);
+}
+
+/* Sección de YouTube */
+/* Sección de canciones YouTube */
+.songs-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.url-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.url-input-group input {
+  flex: 1;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #fff;
+}
+
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.song-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.song-item .title {
+  flex: 1;
+}
+
+.song-item .remove {
+  background: none;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* Botones simples */
+.btn {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mensajes de estado */
+.status-message {
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.youtube-section h4::before {
+  content: "▶️";
+}
+
+.youtube-input {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.youtube-input input {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.youtube-input input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,167,38,0.1);
+}
+
+.youtube-input input.valid {
+  border-color: var(--success);
+}
+
+.youtube-input input.invalid {
+  border-color: var(--error);
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.track-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.track-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.track-item:hover {
+  border-color: var(--accent);
+  transform: translateX(4px);
+}
+
+.track-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-title {
+  color: #fff;
+  font-weight: 500;
+}
+
+.track-url {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.remove-track {
+  background: none;
+  border: none;
+  color: var(--error);
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.remove-track:hover {
+  opacity: 1;
+  background: rgba(255,82,82,0.1);
+}
+
+.form-actions {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-save {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-save:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+}
+
+.album-form {
+  background: var(--glass);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+
+.album-form:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(214,158,46,0.1);
+}
+
+.album-form h3 {
+  color: var(--accent);
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.album-form h3::before {
+  content: "💿";
+}
+
+.album-header {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.album-header input {
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.album-header input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(214,158,46,0.2);
+}
+
+/* Sección de canciones YouTube */
+.songs-section {
+  margin-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 20px;
+}
+
+.songs-section h4 {
+  color: #fff;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.songs-section h4::before {
+  content: "▶️";
+}
+
+.song-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.song-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.song-input input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(214,158,46,0.2);
+}
+
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.song-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.song-item span {
+  flex: 1;
+  color: var(--muted);
+}
+
+.song-item button {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.song-item button:hover {
+  opacity: 1;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-save {
+  background: var(--accent);
+  color: #041018;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(214,158,46,0.2);
+}
+
+.btn-cancel {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.album-form h3 {
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-row > * {
+  flex: 1;
+}
+
+.youtube-tracks {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 16px;
+}
+
+.youtube-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: rgba(255,0,0,0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.youtube-track input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.youtube-track .remove-track {
+  color: #ff4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.youtube-track .remove-track:hover {
+  opacity: 1;
+}
+
+/* Player mejorado */
+.player {
+  margin-top: 12px;
+  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.player-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.player-controls button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: #041018;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.player-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.player iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  margin: 12px 0;
+  background: var(--card);
+}
+
+.progress {
+  height: 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 999px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,var(--accent),#f7d07a);
+  transition: width 0.1s linear;
+}
+.playlist{margin-top:12px}
+.playlist ul{list-style:none;padding:0;margin:0;max-height:200px;overflow:auto}
+.playlist li{padding:6px;border-bottom:1px dashed rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center}
+.footer{text-align:center;padding:10px;color:var(--muted);font-size:0.85rem}
+@media (max-width:1100px){.layout{grid-template-columns:1fr 1fr}}
+@media (max-width:800px){.layout{grid-template-columns:1fr;}}
+
+
+/* 🔧 NUEVAS CLASES: FORMULARIO + TOASTS */
+.form-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* Mejorar campos del formulario */
+.form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(214,158,46,0.2);
+}
+
+/* Zona de upload mejorada */
+.upload-zone {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 2px dashed rgba(255,255,255,0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: rgba(214,158,46,0.05);
+}
+
+/* Sección de YouTube */
+.youtube-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255,0,0,0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255,0,0,0.1);
+}
+
+.youtube-section h4 {
+  color: #ff0000;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.youtube-section h4::before {
+  content: "▶️";
+}
+
+.youtube-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.youtube-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.youtube-preview {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 12px;
+  background: var(--card);
+  aspect-ratio: 16/9;
+}
+.upload-zone input[type="file"] {
+  background: var(--card);
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+}
+.preview {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+.hidden { display: none; }
+
+/* --- TOASTS VISUALES --- */
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+}
+.toast {
+  background: #2b7a78;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateX(40px);
+  animation: slideIn 0.4s forwards, fadeOut 0.4s ease 3.5s forwards;
+}
+@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(40px); } }
+

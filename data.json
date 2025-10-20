@@ -1,0 +1,74 @@
+{
+  "bands": [
+    {
+      "id": "b1",
+      "name": "Máquina de Fuego",
+      "genre": "Heavy Metal",
+      "bio": "Trío de heavy metal clásico con riffs potentes.",
+      "img": "https://picsum.photos/seed/metal1/400/250"
+    },
+    {
+      "id": "b2",
+      "name": "Eco Urbano",
+      "genre": "Rock Alternativo",
+      "bio": "Fusión de rock y electrónica, atmósferas densas.",
+      "img": "https://picsum.photos/seed/rock2/400/250"
+    },
+    {
+      "id": "b3",
+      "name": "Los Vinilos",
+      "genre": "Indie",
+      "bio": "Melodías íntimas y letras directas.",
+      "img": "https://picsum.photos/seed/indie3/400/250"
+    }
+  ],
+  "albums": [
+    {
+      "id": "a1",
+      "bandId": "b1",
+      "title": "Llamas en la Noche",
+      "year": 2019,
+      "cover": "https://picsum.photos/seed/album1/600/400",
+      "tracks": [
+        {"id":"t1","title":"Intro (Forja)", "duration": 42},
+        {"id":"t2","title":"Ruge la Máquina", "duration": 218},
+        {"id":"t3","title":"Cenizas y Sol", "duration": 277}
+      ]
+    },
+    {
+      "id": "a2",
+      "bandId": "b1",
+      "title": "Metal de la Calle",
+      "year": 2022,
+      "cover": "https://picsum.photos/seed/album2/600/400",
+      "tracks": [
+        {"id":"t4","title":"Avenida Sin Ley", "duration": 201},
+        {"id":"t5","title":"Pulsos", "duration": 234},
+        {"id":"t6","title":"Final a Todo Ritmo", "duration": 189}
+      ]
+    },
+    {
+      "id": "a3",
+      "bandId": "b2",
+      "title": "Ciudad Espejo",
+      "year": 2021,
+      "cover": "https://picsum.photos/seed/album3/600/400",
+      "tracks": [
+        {"id":"t7","title":"Reflejo", "duration": 211},
+        {"id":"t8","title":"Baja Luz", "duration": 245}
+      ]
+    },
+    {
+      "id": "a4",
+      "bandId": "b3",
+      "title": "Vinilos de Abril",
+      "year": 2020,
+      "cover": "https://picsum.photos/seed/album4/600/400",
+      "tracks": [
+        {"id":"t9","title":"Azul Mármol", "duration": 198},
+        {"id":"t10","title":"Callejón", "duration": 215},
+        {"id":"t11","title":"Regreso", "duration": 160}
+      ]
+    }
+  ]
+}

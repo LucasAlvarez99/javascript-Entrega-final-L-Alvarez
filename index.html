@@ -1,120 +1,129 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | Game Store - L. Álvarez</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>La Disquera — Heavy Metal Edition</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="container header-container">
-      <div class="logo">🎮 Game Store</div>
-      <button id="themeToggle" class="btn-theme" aria-label="Cambiar tema">
-        <span id="themeIcon">☀️</span>
-      </button>
+  <header class="topbar">
+    <h1>La Disquera</h1>
+    <div class="controls">
+      <input id="search-input" type="search" placeholder="Buscar banda, álbum o canción..." />
+      <select id="genre-filter">
+        <option value="">Todos los géneros</option>
+      </select>
+      <button id="clear-search">Limpiar</button>
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="main-content">
-    <section class="auth-container">
-      <div class="auth-section active">
-        <h1>Iniciar sesión</h1>
-        <p class="subtitle">Accedé con tu cuenta</p>
-        
-        <!-- ESTADÍSTICAS DE USUARIOS -->
-        <div class="user-stats">
-          <p id="userStats">👥 Usuarios: 0 | 👑 Admins: 0</p>
-        </div>
+  <main class="layout">
+    <!-- PANEL DE BANDAS -->
+     <section id="bands-section" class="section panel bandas active">
+      <h2>Bandas</h2>
 
-        <!-- BUSCADOR DE USUARIOS -->
-        <div class="form-group">
-          <label for="searchUsers">🔍 Buscar usuario</label>
-          <input 
-            type="text" 
-            id="searchUsers" 
-            placeholder="Buscar por email o nombre..."
-            class="form-control"
-          >
-        </div>
-
-        <!-- DROPDOWN DE USUARIOS -->
-        <div class="form-group">
-          <label for="userSelect">👤 Usuarios registrados</label>
-          <select id="userSelect" class="form-control">
-            <option value="">-- Seleccionar usuario --</option>
-          </select>
-        </div>
-
-        <!-- FORMULARIO DE LOGIN -->
-        <form id="loginForm" class="auth-form">
-          <div class="form-group">
-            <label for="loginEmail">📧 Email</label>
-            <input 
-              type="email" 
-              id="loginEmail" 
-              placeholder="tu@email.com" 
-              required 
-              autocomplete="email"
-            >
+      <div class="card" id="new-band-form">
+        <h3>Agregar nueva banda</h3>
+        <form id="band-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="band-name">Nombre de la banda</label>
+              <input id="band-name" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="band-genre">Género musical</label>
+              <input id="band-genre" type="text" required />
+            </div>
           </div>
-          
+
           <div class="form-group">
-            <label for="loginPassword">🔑 Contraseña</label>
-            <input 
-              type="password" 
-              id="loginPassword" 
-              placeholder="Tu contraseña" 
-              required 
-              autocomplete="current-password"
-            >
+            <label for="band-bio">Biografía</label>
+            <textarea id="band-bio" rows="3"></textarea>
           </div>
-          
-          <button type="submit" class="btn-primary">Ingresar</button>
-          
-          <!-- BOTÓN LOGIN RÁPIDO -->
-          <button 
-            type="button" 
-            id="quickLoginBtn" 
-            class="btn-secondary" 
-            style="display: none; margin-top: 0.5rem;"
-          >
-            ⚡ Acceso Rápido
-          </button>
-          
-          <p id="loginError" class="error-msg"></p>
+
+          <div class="upload-zone">
+            <label for="band-img">Imagen de la banda</label>
+            <input id="band-img" type="file" accept="image/*" />
+            <img id="preview-img" src="" alt="Vista previa" class="preview hidden" />
+          </div>
+
+          <!-- Nueva sección de YouTube -->
+          <div class="youtube-section">
+            <h4>Agregar canciones desde YouTube</h4>
+            <div class="youtube-input">
+              <input type="text" id="youtube-url" placeholder="Pegar link de YouTube aquí..." />
+              <button type="button" class="btn" id="add-youtube">Agregar</button>
+            </div>
+            <div id="youtube-list"></div>
+          </div>
+
+          <button type="submit" class="btn">Agregar banda</button>
         </form>
+      </div>
 
-        <!-- ENLACES -->
-        <div class="auth-switch">
-          <p>¿No tenés cuenta? <a href="pages/register.html" class="link-btn">Registrate acá</a></p>
+      <div id="bands-list" class="grid"></div>
+    </section>
+
+    <!-- PANEL DE ÁLBUMES -->
+    <section id="albums-section" class="section panel albumes">
+      <h2>Álbumes</h2>
+      <div id="albums-list" class="grid"></div>
+    </section>
+
+    <!-- PANEL DE CANCIONES -->
+    <section id="songs-section" class="section panel canciones">
+      <h2>Canciones</h2>
+      <div class="canciones-section">
+        <!-- Aquí se mostrarán las canciones del álbum -->
+      </div>
+
+      <div class="player card">
+        <h3>Reproductor (sintético)</h3>
+        <div id="now-playing">Nada sonando</div>
+        <div class="player-controls">
+          <button id="play-btn" disabled>Play</button>
+          <button id="pause-btn" disabled>Pause</button>
+          <button id="stop-btn" disabled>Stop</button>
         </div>
+        <div class="progress">
+          <div id="progress-bar"></div>
+        </div>
+      </div>
 
-        <!-- CREDENCIALES DE PRUEBA -->
-        <div class="demo-credentials">
-          <p><strong>💡 Tip:</strong> Seleccioná un usuario del dropdown y usá "Acceso Rápido"</p>
-          <p>O ingresá manualmente:</p>
-          <p>👤 Email: <code>admin@gamestore.com</code></p>
-          <p>🔑 Contraseña: <code>admin123</code></p>
+      <div class="playlist card">
+        <h3>Playlist (guardada)</h3>
+        <ul id="playlist"></ul>
+        <div class="playlist-actions">
+          <button id="save-playlist">Guardar playlist</button>
+          <button id="clear-playlist">Vaciar playlist</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="container">
-      <p>© 2025 Game Store - Lucas Álvarez | Proyecto Final JavaScript</p>
-    </div>
+  <footer class="footer">
+    <small>Proyecto final — Rúbrica JavaScript Flex — Autor: Lucas Alvarez</small>
   </footer>
 
-  <!-- SCRIPTS -->
-  <script src="script/core/storage.js"></script>
-  <script src="script/core/helpers.js"></script>
-  <script src="script/core/global.js"></script>
-  <script src="script/modules/login.js"></script>
+  <!-- API de YouTube -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
+  <script src="app.js"></script>
+  <script src="script/modules/albums.js"></script>
+  <script>
+    // Inicialización después de cargar todos los scripts
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, initializing app...');
+      if (typeof window.STATE === 'undefined') {
+        console.error('STATE no está definido');
+      }
+    });
+
+    // Función requerida por la API de YouTube
+    function onYouTubeIframeAPIReady() {
+      console.log('YouTube API Ready');
+    }
+  </script>
 </body>
 </html>
