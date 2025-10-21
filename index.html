@@ -88,29 +88,42 @@
   <div id="toast-container"></div>
 
   <!-- ============================================
-       SCRIPTS - ORDEN CRÍTICO
+       SCRIPTS - ORDEN CRÍTICO (NO CAMBIAR)
        ============================================ -->
   
-  <!-- 1. API de YouTube -->
+  <!-- 1. API de YouTube (PRIMERO) -->
   <script src="https://www.youtube.com/iframe_api"></script>
   
   <!-- 2. App principal (gestión de bandas) -->
   <script src="app.js"></script>
   
-  <!-- 3. Módulos en orden de dependencias -->
+  <!-- 3. Módulos CORE (en este orden exacto) -->
   <script src="script/modules/albums-core.js"></script>
   <script src="script/modules/youtube-utils.js"></script>
   <script src="script/modules/modal-system.js"></script>
+  
+  <!-- 4. Módulos de FORMULARIOS -->
   <script src="script/modules/albums-form.js"></script>
   <script src="script/modules/albums-save.js"></script>
+  
+  <!-- 5. Módulo de RENDERIZADO -->
   <script src="script/modules/albums-render.js"></script>
+  
+  <!-- 6. Módulo de AGREGAR CANCIONES (NUEVO) -->
+  <script src="script/modules/albums-songs-manager.js"></script>
+  
+  <!-- 7. Módulos de REPRODUCCIÓN -->
   <script src="script/modules/player-audio.js"></script>
   <script src="script/modules/playlist-manager.js"></script>
+  
+  <!-- 8. Inicialización (ÚLTIMO) -->
   <script src="script/modules/albums-main.js"></script>
   
-  <!-- 4. Inicialización -->
+  <!-- 9. Callbacks y verificación -->
   <script>
-    console.log('🎬 [index.html] Todos los scripts cargados');
+    console.log('🎬 ============================================');
+    console.log('🎬 [index.html] TODOS LOS SCRIPTS CARGADOS');
+    console.log('🎬 ============================================');
     
     // Callback requerido por YouTube API
     function onYouTubeIframeAPIReady() {
@@ -119,8 +132,12 @@
     
     // Verificar carga completa
     window.addEventListener('load', () => {
-      console.log('✅ [index.html] Página completamente cargada');
-      console.log('📊 [index.html] Verificando módulos...');
+      console.log('🎉 ============================================');
+      console.log('🎉 [index.html] PÁGINA COMPLETAMENTE CARGADA');
+      console.log('🎉 ============================================');
+      console.log('');
+      console.log('📊 Verificando módulos cargados...');
+      console.log('');
       
       const modules = {
         'STATE': !!window.STATE,
@@ -128,6 +145,7 @@
         'albumsForm': !!window.albumsForm,
         'albumsSave': !!window.albumsSave,
         'albumsRender': !!window.albumsRender,
+        'albumsSongsManager': !!window.albumsSongsManager,
         'youtubeUtils': !!window.youtubeUtils,
         'playerAudio': !!window.playerAudio,
         'playlistManager': !!window.playlistManager,
@@ -139,9 +157,27 @@
       
       const missing = Object.entries(modules).filter(([_, loaded]) => !loaded);
       if (missing.length > 0) {
-        console.error('❌ Módulos faltantes:', missing.map(([name]) => name));
+        console.error('❌ ============================================');
+        console.error('❌ MÓDULOS FALTANTES:', missing.map(([name]) => name));
+        console.error('❌ ============================================');
       } else {
-        console.log('✅ Todos los módulos cargados correctamente');
+        console.log('✅ ============================================');
+        console.log('✅ TODOS LOS MÓDULOS CARGADOS CORRECTAMENTE');
+        console.log('✅ ============================================');
+        console.log('');
+        console.log('💡 Tips:');
+        console.log('  - Usa Ctrl+D para debug info');
+        console.log('  - Revisa los logs con emojis para tracking');
+        console.log('  - Los álbumes del JSON deben aparecer');
+        console.log('  - Botón "➕ Canciones" debe estar visible');
+        console.log('');
+      }
+      
+      // Verificar función crítica
+      if (typeof window.showAddSongsModal === 'function') {
+        console.log('✅ Función showAddSongsModal disponible');
+      } else {
+        console.error('❌ Función showAddSongsModal NO disponible');
       }
     });
   </script>

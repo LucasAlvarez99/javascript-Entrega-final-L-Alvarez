@@ -158,7 +158,6 @@ function editAlbum(albumId) {
     console.log('✅ [albums-save] Álbum encontrado:', album.title);
     console.log('ℹ️ [albums-save] Función de edición en desarrollo...');
     
-    // TODO: Implementar edición de álbum
     window.albumsCore.showToast('Función de edición en desarrollo', 'info');
 }
 
@@ -180,17 +179,26 @@ function deleteAlbum(albumId) {
     
     console.log('✅ [albums-save] Álbum encontrado:', album.title);
     
-    // Confirmar eliminación
-    const confirmDelete = confirm(`¿Estás seguro de eliminar el álbum "${album.title}"?`);
-    
-    if (!confirmDelete) {
-        console.log('❌ [albums-save] Eliminación cancelada por el usuario');
-        return;
+    // Usar modal bonito si existe
+    if (window.modalSystem && window.modalSystem.confirm) {
+        window.modalSystem.confirm(
+            `¿Estás seguro de eliminar el álbum "${album.title}"?`,
+            () => {
+                performDeleteAlbum(albumId, album);
+            }
+        );
+    } else {
+        // Fallback a confirm nativo
+        const confirmDelete = confirm(`¿Estás seguro de eliminar el álbum "${album.title}"?`);
+        if (confirmDelete) {
+            performDeleteAlbum(albumId, album);
+        }
     }
-    
+}
+
+function performDeleteAlbum(albumId, album) {
     console.log('🗑️ [albums-save] Confirmado, eliminando...');
     
-    // Filtrar álbumes
     const initialCount = window.STATE.albums.length;
     window.STATE.albums = window.STATE.albums.filter(a => a.id !== albumId);
     const finalCount = window.STATE.albums.length;
@@ -203,13 +211,11 @@ function deleteAlbum(albumId) {
         return;
     }
     
-    // Guardar cambios
     const saved = window.albumsCore.saveAlbumsToStorage();
     if (saved) {
         console.log('✅ [albums-save] Cambios guardados en localStorage');
     }
     
-    // Actualizar UI
     console.log('🎨 [albums-save] Actualizando interfaz...');
     window.albumsRender.renderAlbums(album.bandId);
     

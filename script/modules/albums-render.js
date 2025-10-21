@@ -139,20 +139,29 @@ function createAlbumCardHTML(album, band) {
                 <div class="meta">${bandName} · ${album.year}</div>
                 <small style="color:#9aa4b2;">${trackCount} canciones</small>
             </div>
-            <div class="actions" style="margin-top:12px;display:flex;gap:8px;">
-                <button type="button" 
-                        class="btn btn-primary" 
-                        onclick="window.verCanciones('${album.id}')"
-                        title="Ver canciones"
-                        style="flex:1;">
-                    🎵 Ver canciones
-                </button>
+            <div class="actions" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:8px;">
+                    <button type="button" 
+                            class="btn btn-primary" 
+                            onclick="window.verCanciones('${album.id}')"
+                            title="Ver canciones"
+                            style="flex:1;">
+                        🎵 Ver
+                    </button>
+                    <button type="button" 
+                            class="btn" 
+                            onclick="window.showAddSongsModal('${album.id}')"
+                            title="Agregar más canciones"
+                            style="flex:1; background: var(--accent); color: #000;">
+                        ➕ Canciones
+                    </button>
+                </div>
                 <button type="button" 
                         class="btn btn-secondary" 
                         onclick="window.agregarAlbumAPlaylist('${album.id}')"
-                        title="Agregar a playlist"
-                        style="flex:1;">
-                    ➕ Playlist
+                        title="Agregar todo a playlist"
+                        style="width:100%;">
+                    📋 Agregar a Playlist
                 </button>
             </div>
         </div>
