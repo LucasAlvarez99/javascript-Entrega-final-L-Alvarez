@@ -67,6 +67,9 @@ function showAlbumForm(bandId) {
     albumsList.insertBefore(form, albumsList.firstChild);
     console.log('✅ [albums-form] Formulario insertado en el DOM');
     
+    // Scroll al formulario
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
     // Configurar eventos
     setupFormEvents();
     console.log('✅ [albums-form] Eventos configurados');
@@ -81,70 +84,87 @@ function createAlbumFormHTML(bandId, bandName) {
     console.log('📊 [albums-form] Parámetros:', { bandId, bandName });
     
     const form = document.createElement('div');
-    form.className = 'album-form panel';
+    form.className = 'album-form card';
     form.setAttribute('data-band-id', bandId);
+    form.style.cssText = `
+        background: linear-gradient(135deg, rgba(255,167,38,0.1) 0%, rgba(255,167,38,0.05) 100%);
+        border: 2px solid var(--accent);
+        padding: 24px;
+        margin-bottom: 20px;
+    `;
     
     form.innerHTML = `
-        <div class="album-form-header">
-            <h3>Nuevo álbum</h3>
-            <p class="band-info">Banda: ${bandName}</p>
+        <div class="album-form-header" style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--accent);">
+            <h3 style="color: var(--accent); margin: 0 0 8px 0;">➕ Nuevo álbum</h3>
+            <p class="band-info" style="margin: 0; color: #9aa4b2;">Banda: <strong style="color: #fff;">${bandName}</strong></p>
         </div>
         
-        <div class="form-row">
+        <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
             <div class="form-group">
-                <label for="album-title">Título del álbum</label>
+                <label for="album-title" style="display: block; margin-bottom: 8px; color: var(--accent); font-weight: 500;">
+                    Título del álbum *
+                </label>
                 <input type="text" 
                        id="album-title" 
                        required 
                        placeholder="Ej: Greatest Hits"
-                       autocomplete="off">
+                       autocomplete="off"
+                       style="width: 100%; padding: 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: #fff;">
             </div>
             <div class="form-group">
-                <label for="album-year">Año</label>
+                <label for="album-year" style="display: block; margin-bottom: 8px; color: var(--accent); font-weight: 500;">
+                    Año *
+                </label>
                 <input type="number" 
                        id="album-year" 
                        required 
                        min="1900" 
                        max="2025" 
-                       value="${new Date().getFullYear()}">
+                       value="${new Date().getFullYear()}"
+                       style="width: 100%; padding: 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: #fff;">
             </div>
         </div>
 
-        <div class="songs-section">
-            <h4>🎵 Agregar canciones desde YouTube</h4>
+        <div class="songs-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <h4 style="color: #fff; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
+                🎵 Canciones desde YouTube
+            </h4>
+            <p style="color: #9aa4b2; font-size: 0.9rem; margin: 0 0 16px 0;">
+                Solo se extraerá el audio del video
+            </p>
             
-            <div class="url-input-group">
-                <div class="input-with-icon">
-                    <i class="yt-icon">▶️</i>
-                    <input type="text" 
-                           id="song-url" 
-                           placeholder="https://youtube.com/watch?v=..."
-                           autocomplete="off">
-                </div>
+            <div class="url-input-group" style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <input type="text" 
+                       id="song-url" 
+                       placeholder="https://youtube.com/watch?v=..."
+                       autocomplete="off"
+                       style="flex: 1; padding: 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); color: #fff;">
                 <button type="button" 
                         class="btn btn-add-song" 
-                        id="add-song">
+                        id="add-song"
+                        style="padding: 12px 24px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
                     Agregar
                 </button>
             </div>
 
-            <div id="song-list" class="song-list">
-                <div class="status-message">
-                    <i class="music-icon">🎵</i>
-                    <p>No hay canciones agregadas</p>
+            <div id="song-list" class="song-list" style="min-height: 100px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 16px;">
+                <div class="status-message" style="text-align: center; color: #666; padding: 20px;">
+                    🎵 No hay canciones agregadas
                 </div>
             </div>
         </div>
 
-        <div class="form-actions">
+        <div class="form-actions" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
             <button type="button" 
                     class="btn btn-cancel" 
-                    onclick="cancelAlbumForm()">
+                    onclick="cancelAlbumForm()"
+                    style="padding: 12px 24px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">
                 Cancelar
             </button>
             <button type="button" 
                     class="btn btn-save" 
-                    onclick="saveAlbum('${bandId}')">
+                    onclick="saveAlbum('${bandId}')"
+                    style="padding: 12px 24px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
                 Guardar álbum
             </button>
         </div>
@@ -288,9 +308,8 @@ function renderCurrentSongs() {
     if (window.currentTracks.length === 0) {
         console.log('ℹ️ [albums-form] No hay canciones, mostrando mensaje');
         list.innerHTML = `
-            <div class="status-message">
-                <i class="music-icon">🎵</i>
-                <p>No hay canciones agregadas</p>
+            <div class="status-message" style="text-align: center; color: #666; padding: 20px;">
+                🎵 No hay canciones agregadas
             </div>
         `;
         return;
@@ -300,15 +319,35 @@ function renderCurrentSongs() {
     list.innerHTML = window.currentTracks.map((track, index) => {
         console.log(`  - Canción ${index + 1}:`, track.title);
         return `
-            <div class="song-item" data-index="${index}">
-                <span class="title">🎵 ${track.title}</span>
-                <small class="duration">
-                    ${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}
-                </small>
-                <button class="remove" 
-                        onclick="removeSongFromForm(${index})"
-                        title="Eliminar">
-                    ❌
+            <div class="song-item" data-index="${index}" style="
+                background: rgba(255,167,38,0.1);
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-left: 4px solid var(--accent);
+            ">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.2rem;">🎵</span>
+                    <div>
+                        <div style="color: #fff; font-weight: 500;">${track.title}</div>
+                        <small style="color: #9aa4b2;">Solo audio · ${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}</small>
+                    </div>
+                </div>
+                <button onclick="removeSongFromForm(${index})"
+                        title="Eliminar"
+                        style="
+                            background: rgba(244,67,54,0.2);
+                            color: #f44336;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: 500;
+                        ">
+                    ❌ Eliminar
                 </button>
             </div>
         `;

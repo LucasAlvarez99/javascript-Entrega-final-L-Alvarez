@@ -1,5 +1,6 @@
 // ============================================
 // ALBUMS-RENDER.JS - Renderizar UI
+// VERSIÓN CORREGIDA
 // ============================================
 
 console.log('🎨 [albums-render.js] Iniciando módulo de renderizado...');
@@ -10,7 +11,7 @@ console.log('🎨 [albums-render.js] Iniciando módulo de renderizado...');
 
 function renderAlbums(bandId) {
     console.log('🎨 [albums-render] renderAlbums llamado');
-    console.log('📊 [albums-render] BandId:', bandId);
+    console.log('📊 [albums-render] BandId recibido:', bandId);
     
     const albumsList = document.getElementById('albums-list');
     if (!albumsList) {
@@ -20,24 +21,40 @@ function renderAlbums(bandId) {
     
     console.log('✅ [albums-render] Contenedor encontrado');
     
-    // Obtener bandId actual si no se proporciona
+    // Si no hay bandId, intentar obtenerlo
     if (!bandId) {
         bandId = window.albumsCore.getCurrentBandId();
         console.log('📊 [albums-render] BandId obtenido:', bandId);
     }
     
     // Guardar en STATE
-    if (bandId) {
+    if (bandId && window.STATE) {
         window.STATE.currentBandId = bandId;
         console.log('💾 [albums-render] BandId guardado en STATE');
     }
     
-    // Obtener álbumes de la banda
-    const bandAlbums = bandId ? 
-        window.albumsCore.getAlbumsByBandId(bandId) : 
-        window.STATE.albums || [];
+    // ✅ CARGAR ÁLBUMES DEL LOCALSTORAGE
+    const savedAlbums = localStorage.getItem('albums');
+    if (savedAlbums) {
+        try {
+            const parsedAlbums = JSON.parse(savedAlbums);
+            if (Array.isArray(parsedAlbums)) {
+                window.STATE.albums = [...window.STATE.albums, ...parsedAlbums];
+                console.log(`📀 [albums-render] ${parsedAlbums.length} álbumes cargados desde localStorage`);
+            }
+        } catch (e) {
+            console.error('❌ [albums-render] Error al parsear álbumes:', e);
+        }
+    }
     
-    console.log(`📊 [albums-render] ${bandAlbums.length} álbumes a renderizar`);
+    // Obtener álbumes de la banda
+    const allAlbums = window.STATE.albums || [];
+    const bandAlbums = bandId ? 
+        allAlbums.filter(a => a.bandId === bandId) : 
+        allAlbums;
+    
+    console.log(`📊 [albums-render] Total álbumes: ${allAlbums.length}`);
+    console.log(`📊 [albums-render] Álbumes de esta banda: ${bandAlbums.length}`);
     
     // Crear HTML
     let html = '';
@@ -46,12 +63,17 @@ function renderAlbums(bandId) {
     if (bandId) {
         console.log('🏗️ [albums-render] Agregando botón de crear álbum');
         html += `
-            <div class="card album add-album">
-                <div class="thumb" 
-                     style="cursor: pointer" 
-                     onclick="showAlbumForm('${bandId}')">
-                    <span style="font-size: 24px">+</span><br>
-                    Agregar álbum
+            <div class="card album add-album" onclick="window.showAlbumForm('${bandId}')" style="cursor:pointer;">
+                <div class="thumb" style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255,167,38,0.1);
+                    border: 2px dashed var(--accent);
+                ">
+                    <span style="font-size: 48px; margin-bottom: 8px;">➕</span>
+                    <span style="color: var(--accent); font-weight: 600;">Agregar álbum</span>
                 </div>
             </div>
         `;
@@ -60,12 +82,20 @@ function renderAlbums(bandId) {
     // Renderizar álbumes existentes
     if (bandAlbums.length === 0) {
         console.log('ℹ️ [albums-render] No hay álbumes para mostrar');
-        html += `
-            <div class="card empty-state">
-                <p>No hay álbumes</p>
-                ${bandId ? '<small>Haz clic en + para agregar uno</small>' : ''}
-            </div>
-        `;
+        if (!bandId) {
+            html += `
+                <div class="card empty-state">
+                    <p>Selecciona una banda para ver sus álbumes</p>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="card empty-state">
+                    <p>No hay álbumes</p>
+                    <small>Haz clic en ➕ para agregar uno</small>
+                </div>
+            `;
+        }
     } else {
         console.log('🏗️ [albums-render] Generando HTML de álbumes...');
         bandAlbums.forEach((album, index) => {
@@ -79,6 +109,12 @@ function renderAlbums(bandId) {
     // Insertar HTML
     albumsList.innerHTML = html;
     console.log('✅ [albums-render] Álbumes renderizados correctamente');
+    
+    // Scroll suave a la sección
+    const albumsSection = document.getElementById('albums-section');
+    if (albumsSection) {
+        albumsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // ============================================
@@ -89,28 +125,33 @@ function createAlbumCardHTML(album, band) {
     console.log('🏗️ [albums-render] Creando card para:', album.title);
     
     const bandName = band ? band.name : 'Banda desconocida';
+    const trackCount = album.tracks ? album.tracks.length : 0;
     
     return `
         <div class="card album" data-album-id="${album.id}">
-            <img src="${album.cover}" 
-                 alt="${album.title}" 
-                 class="thumb">
+            <div class="thumb">
+                <img src="${album.cover}" 
+                     alt="${album.title}" 
+                     style="width:100%;height:100%;object-fit:cover;border-radius:6px">
+            </div>
             <div class="info">
                 <h4>${album.title}</h4>
                 <div class="meta">${bandName} · ${album.year}</div>
-                <small>${album.tracks.length} canciones</small>
+                <small style="color:#9aa4b2;">${trackCount} canciones</small>
             </div>
-            <div class="actions">
+            <div class="actions" style="margin-top:12px;display:flex;gap:8px;">
                 <button type="button" 
                         class="btn btn-primary" 
-                        onclick="verCanciones('${album.id}')"
-                        title="Ver canciones">
+                        onclick="window.verCanciones('${album.id}')"
+                        title="Ver canciones"
+                        style="flex:1;">
                     🎵 Ver canciones
                 </button>
                 <button type="button" 
                         class="btn btn-secondary" 
-                        onclick="agregarAlbumAPlaylist('${album.id}')"
-                        title="Agregar a playlist">
+                        onclick="window.agregarAlbumAPlaylist('${album.id}')"
+                        title="Agregar a playlist"
+                        style="flex:1;">
                     ➕ Playlist
                 </button>
             </div>
@@ -170,7 +211,7 @@ function renderSongs(albumId) {
         
         <div id="player-container" class="player-container">
             <div class="player">
-                <h3>🎵 Reproductor</h3>
+                <h3>🎵 Reproductor (Solo Audio)</h3>
                 <div id="youtube-player"></div>
                 <div id="now-playing">Selecciona una canción para reproducir</div>
                 <div class="player-controls">
@@ -259,15 +300,12 @@ function renderPlaylist() {
     
     console.log('✅ [albums-render] Elemento playlist encontrado');
     
-    // Validar que existe la playlist
     if (!window.STATE.playlist) {
-        console.warn('⚠️ [albums-render] STATE.playlist no existe, inicializando...');
         window.STATE.playlist = [];
     }
     
     console.log('📊 [albums-render] Canciones en playlist:', window.STATE.playlist.length);
     
-    // Renderizar contenido
     if (window.STATE.playlist.length === 0) {
         console.log('ℹ️ [albums-render] Playlist vacía');
         playlistElement.innerHTML = `
@@ -370,12 +408,10 @@ function highlightCurrentTrack(trackId) {
     console.log('🎨 [albums-render] highlightCurrentTrack llamado');
     console.log('📊 [albums-render] Track ID:', trackId);
     
-    // Remover highlight anterior
     const previousHighlight = document.querySelectorAll('.song.playing');
     console.log(`🧹 [albums-render] Removiendo ${previousHighlight.length} highlights previos`);
     previousHighlight.forEach(song => song.classList.remove('playing'));
     
-    // Agregar highlight al actual
     const currentSong = document.querySelector(`[data-track-id="${trackId}"]`);
     if (currentSong) {
         currentSong.classList.add('playing');
@@ -399,6 +435,12 @@ window.albumsRender = {
 
 // Alias globales
 window.verCanciones = renderSongs;
+window.agregarAlbumAPlaylist = function(albumId) {
+    console.log('➕ [albums-render] Agregando álbum completo a playlist:', albumId);
+    if (window.playlistManager && window.playlistManager.addAlbum) {
+        window.playlistManager.addAlbum(albumId);
+    }
+};
 
 console.log('✅ [albums-render.js] Módulo de renderizado cargado');
 console.log('📦 [albums-render.js] Funciones disponibles:', Object.keys(window.albumsRender));

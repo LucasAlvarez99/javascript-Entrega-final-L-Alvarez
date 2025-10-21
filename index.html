@@ -10,11 +10,11 @@
   <header class="topbar">
     <h1>🎸 La Disquera</h1>
     <div class="controls">
-      <input id="search-input" type="search" placeholder="Buscar banda, álbum o canción..." />
+      <input id="search-input" type="search" placeholder="Buscar banda, álbum..." />
       <select id="genre-filter">
         <option value="">Todos los géneros</option>
       </select>
-      <button id="clear-search">Limpiar</button>
+      <button id="clear-search" class="btn">Limpiar</button>
     </div>
   </header>
 
@@ -49,9 +49,12 @@
           </div>
 
           <div class="youtube-section">
-            <h4>Agregar canciones desde YouTube</h4>
+            <h4>🎵 Agregar canciones desde YouTube</h4>
+            <p style="color:#9aa4b2; font-size:0.9rem; margin-bottom:12px;">
+              Solo se usará el audio del video
+            </p>
             <div class="youtube-input">
-              <input type="text" id="youtube-url" placeholder="Pegar link de YouTube aquí..." autocomplete="off" />
+              <input type="text" id="youtube-url" placeholder="https://youtube.com/watch?v=..." autocomplete="off" />
               <button type="button" class="btn" id="add-youtube">Agregar</button>
             </div>
             <div id="youtube-list"></div>
@@ -85,53 +88,61 @@
   <div id="toast-container"></div>
 
   <!-- ============================================
-       SCRIPTS - ORDEN DE CARGA IMPORTANTE
+       SCRIPTS - ORDEN CRÍTICO
        ============================================ -->
   
-  <!-- 1. API de YouTube (debe cargarse primero) -->
+  <!-- 1. API de YouTube -->
   <script src="https://www.youtube.com/iframe_api"></script>
   
-  <!-- 2. Script principal de app.js (gestión de bandas) -->
-  <script src=".app.js"></script>
+  <!-- 2. App principal (gestión de bandas) -->
+  <script src="app.js"></script>
   
-  <!-- 3. Módulos de álbumes (en orden de dependencias) -->
-  <script src="./script/modules/albums-core.js"></script>
-  <script src="./script/modules/youtube-utils.js"></script>
-  <script src="./script/modules/modal-system.js"></script>
-  <script src="./script/modules/albums-form.js"></script>
-  <script src="./script/modules/albums-save.js"></script>
-  <script src="./script/modules/albums-render.js"></script>
-  <script src="./script/modules/player-audio.js"></script>
-  <script src="./script/modules/playlist-manager.js"></script>
+  <!-- 3. Módulos en orden de dependencias -->
+  <script src="script/modules/albums-core.js"></script>
+  <script src="script/modules/youtube-utils.js"></script>
+  <script src="script/modules/modal-system.js"></script>
+  <script src="script/modules/albums-form.js"></script>
+  <script src="script/modules/albums-save.js"></script>
+  <script src="script/modules/albums-render.js"></script>
+  <script src="script/modules/player-audio.js"></script>
+  <script src="script/modules/playlist-manager.js"></script>
+  <script src="script/modules/albums-main.js"></script>
   
-  <!-- 4. Inicialización principal (debe ser el último) -->
-  <script src="./script/modules/albums-main.js"></script>
-  
-  <!-- 5. Callback de YouTube API -->
+  <!-- 4. Inicialización -->
   <script>
-    console.log('🎬 [index.html] Scripts cargados');
+    console.log('🎬 [index.html] Todos los scripts cargados');
     
-    // Función requerida por la API de YouTube
+    // Callback requerido por YouTube API
     function onYouTubeIframeAPIReady() {
-      console.log('✅ [YouTube API] API lista');
-      if (window.youtubeUtils && window.youtubeUtils.onAPIReady) {
-        window.youtubeUtils.onAPIReady();
-      }
+      console.log('✅ [YouTube API] API lista y funcionando');
     }
     
-    // Log de inicialización
+    // Verificar carga completa
     window.addEventListener('load', () => {
       console.log('✅ [index.html] Página completamente cargada');
-      console.log('📊 [index.html] Módulos disponibles:', {
-        albumsCore: !!window.albumsCore,
-        albumsForm: !!window.albumsForm,
-        albumsSave: !!window.albumsSave,
-        albumsRender: !!window.albumsRender,
-        youtubeUtils: !!window.youtubeUtils,
-        playerAudio: !!window.playerAudio,
-        playlistManager: !!window.playlistManager,
-        albumsApp: !!window.albumsApp
-      });
+      console.log('📊 [index.html] Verificando módulos...');
+      
+      const modules = {
+        'STATE': !!window.STATE,
+        'albumsCore': !!window.albumsCore,
+        'albumsForm': !!window.albumsForm,
+        'albumsSave': !!window.albumsSave,
+        'albumsRender': !!window.albumsRender,
+        'youtubeUtils': !!window.youtubeUtils,
+        'playerAudio': !!window.playerAudio,
+        'playlistManager': !!window.playlistManager,
+        'modalSystem': !!window.modalSystem,
+        'albumsApp': !!window.albumsApp
+      };
+      
+      console.table(modules);
+      
+      const missing = Object.entries(modules).filter(([_, loaded]) => !loaded);
+      if (missing.length > 0) {
+        console.error('❌ Módulos faltantes:', missing.map(([name]) => name));
+      } else {
+        console.log('✅ Todos los módulos cargados correctamente');
+      }
     });
   </script>
 </body>

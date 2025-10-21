@@ -47,19 +47,19 @@ function loadAlbumsFromStorage() {
             console.log(`📀 [albums-core] ${albums.length} álbumes encontrados en storage`);
             
             if (Array.isArray(albums)) {
-                window.STATE.albums = albums;
-                console.log('✅ [albums-core] Álbumes cargados:', albums);
+                // NO sobrescribir, sino combinar con los del JSON
+                const existingIds = new Set(window.STATE.albums.map(a => a.id));
+                const newAlbums = albums.filter(a => !existingIds.has(a.id));
+                window.STATE.albums = [...window.STATE.albums, ...newAlbums];
+                console.log('✅ [albums-core] Álbumes combinados:', window.STATE.albums.length);
             } else {
                 console.warn('⚠️ [albums-core] Datos de álbumes no son array');
-                window.STATE.albums = [];
             }
         } else {
             console.log('ℹ️ [albums-core] No hay álbumes guardados');
-            window.STATE.albums = window.STATE.albums || [];
         }
     } catch (error) {
         console.error('❌ [albums-core] Error al cargar álbumes:', error);
-        window.STATE.albums = [];
     }
 }
 
@@ -73,10 +73,14 @@ function saveAlbumsToStorage() {
             return false;
         }
         
-        const albumsJSON = JSON.stringify(window.STATE.albums);
+        // Solo guardar álbumes creados por el usuario (no los del JSON)
+        const baseAlbumIds = new Set(['a1', 'a2', 'a3', 'a4']);
+        const customAlbums = window.STATE.albums.filter(a => !baseAlbumIds.has(a.id));
+        
+        const albumsJSON = JSON.stringify(customAlbums);
         localStorage.setItem('albums', albumsJSON);
         
-        console.log(`✅ [albums-core] ${window.STATE.albums.length} álbumes guardados`);
+        console.log(`✅ [albums-core] ${customAlbums.length} álbumes personalizados guardados`);
         return true;
     } catch (error) {
         console.error('❌ [albums-core] Error al guardar álbumes:', error);
@@ -256,14 +260,23 @@ function showToast(message, type = 'success') {
     };
     
     toast.style.background = colors[type] || colors.success;
+    toast.style.color = '#fff';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+    toast.style.fontSize = '0.95rem';
+    toast.style.fontWeight = '500';
     
     container.appendChild(toast);
     console.log('✅ [albums-core] Toast agregado al DOM');
     
     // Auto-remover después de 3 segundos
     setTimeout(() => {
-        toast.remove();
-        console.log('🗑️ [albums-core] Toast removido');
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            toast.remove();
+            console.log('🗑️ [albums-core] Toast removido');
+        }, 300);
     }, 3000);
 }
 
