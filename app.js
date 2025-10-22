@@ -1,5 +1,5 @@
-/* app.js - La Disquera - VERSIÓN FINAL
-   Con modales bonitos y sin mostrar links de YouTube
+/* app.js - La Disquera - VERSIÓN FINAL ARREGLADA
+   Arregla el problema de bandId no encontrado
 */
 
 console.log('🎸 [app.js] Iniciando...');
@@ -31,15 +31,19 @@ async function loadData() {
     const data = await res.json();
     
     console.log('✅ [app.js] data.json cargado');
+    console.log('📊 [app.js] Bandas del JSON:', data.bands.length);
+    console.log('📊 [app.js] Álbumes del JSON:', data.albums.length);
 
     const storedBands = JSON.parse(localStorage.getItem('disquera_bands') || '[]');
     console.log(`📊 [app.js] ${storedBands.length} bandas guardadas encontradas`);
     
     STATE.bands = [...data.bands, ...storedBands];
-    STATE.albums = data.albums;
+    STATE.albums = data.albums; // ✅ IMPORTANTE: Cargar álbumes del JSON
     STATE.bands.forEach(b => STATE.genres.add(b.genre));
     
     console.log(`✅ [app.js] ${STATE.bands.length} bandas cargadas en total`);
+    console.log(`✅ [app.js] ${STATE.albums.length} álbumes cargados en total`);
+    
     return data;
   } catch (error) {
     console.error('❌ [app.js] Error al cargar datos:', error);
@@ -146,7 +150,6 @@ function renderYoutubeLinks() {
     return;
   }
   
-  // NO MOSTRAR IFRAMES - Solo lista de canciones
   container.innerHTML = STATE.tempYoutubeLinks.map((link, index) => `
     <div class="song-preview-item" style="
       background: rgba(255,167,38,0.1);
@@ -227,15 +230,23 @@ function deleteBand(id) {
   const band = STATE.bands.find(b => b.id === id);
   if (!band) return;
   
-  // USAR MODAL BONITO en lugar de confirm()
-  window.modalSystem.deleteBand(band.name, () => {
-    STATE.bands = STATE.bands.filter(b => b.id !== id);
-    saveBandsToLocalStorage();
-    renderBands();
-    
-    console.log('✅ [app.js] Banda eliminada');
-    window.albumsCore.showToast(`🗑️ Banda "${band.name}" eliminada`, 'info');
-  });
+  if (window.modalSystem && window.modalSystem.deleteBand) {
+    window.modalSystem.deleteBand(band.name, () => {
+      STATE.bands = STATE.bands.filter(b => b.id !== id);
+      saveBandsToLocalStorage();
+      renderBands();
+      
+      console.log('✅ [app.js] Banda eliminada');
+      window.albumsCore.showToast(`🗑️ Banda "${band.name}" eliminada`, 'info');
+    });
+  } else {
+    if (confirm(`¿Seguro que querés eliminar la banda "${band.name}"?`)) {
+      STATE.bands = STATE.bands.filter(b => b.id !== id);
+      saveBandsToLocalStorage();
+      renderBands();
+      window.albumsCore.showToast(`🗑️ Banda "${band.name}" eliminada`, 'info');
+    }
+  }
 }
 
 /* ------------------ RENDERS ------------------ */
@@ -259,6 +270,7 @@ function renderGenres() {
 function renderBands(filterText = '', genre = '') {
   console.log('🎨 [app.js] Renderizando bandas...');
   console.log('📊 [app.js] Filtros:', { filterText, genre });
+  console.log('📊 [app.js] Total bandas en STATE:', STATE.bands.length);
   
   const container = $('#bands-list');
   if (!container) return;
@@ -279,6 +291,8 @@ function renderBands(filterText = '', genre = '') {
   }
 
   list.forEach(b => {
+    console.log(`  🎸 Renderizando banda: ${b.name} (ID: ${b.id})`); // ✅ LOG IMPORTANTE
+    
     const node = document.createElement('div');
     node.className = 'card band';
     node.innerHTML = `
@@ -303,18 +317,42 @@ function renderBands(filterText = '', genre = '') {
     container.appendChild(node);
   });
 
-  // Eventos
+  // ✅ EVENTOS - CRÍTICO
   $all('.view-albums').forEach(btn => {
     btn.onclick = e => {
       const bandId = e.currentTarget.dataset.band;
-      console.log('👁️ [app.js] Ver álbumes de banda:', bandId);
-      STATE.currentBandId = bandId;
+      console.log('👁️ [app.js] ========================================');
+      console.log('👁️ [app.js] CLICK EN VER ÁLBUMES');
+      console.log('👁️ [app.js] Band ID del botón:', bandId);
+      console.log('👁️ [app.js] ========================================');
       
-      if (window.albumsRender && typeof window.albumsRender.renderAlbums === 'function') {
-        window.albumsRender.renderAlbums(bandId);
+      // ✅ GUARDAR EN STATE
+      STATE.currentBandId = bandId;
+      console.log('💾 [app.js] currentBandId guardado en STATE:', STATE.currentBandId);
+      
+      // ✅ VERIFICAR QUE LA BANDA EXISTE
+      const band = STATE.bands.find(b => b.id === bandId);
+      if (band) {
+        console.log('✅ [app.js] Banda encontrada:', band.name);
+      } else {
+        console.error('❌ [app.js] Banda NO encontrada con ID:', bandId);
+        console.log('📊 [app.js] Bandas disponibles:', STATE.bands.map(b => ({ id: b.id, name: b.name })));
       }
       
-      document.getElementById('albums-section')?.scrollIntoView({behavior:'smooth'});
+      // ✅ LLAMAR A RENDER ALBUMS
+      if (window.albumsRender && typeof window.albumsRender.renderAlbums === 'function') {
+        console.log('📞 [app.js] Llamando a albumsRender.renderAlbums...');
+        window.albumsRender.renderAlbums(bandId);
+      } else {
+        console.error('❌ [app.js] albumsRender.renderAlbums NO disponible');
+      }
+      
+      // ✅ SCROLL
+      const albumsSection = document.getElementById('albums-section');
+      if (albumsSection) {
+        albumsSection.scrollIntoView({behavior:'smooth'});
+        console.log('📜 [app.js] Scroll a sección de álbumes');
+      }
     };
   });
 
@@ -454,6 +492,8 @@ async function bootstrap() {
     bindUI();
     
     console.log('✅ [app.js] Bootstrap completado');
+    console.log('📊 [app.js] STATE.bands:', STATE.bands.length);
+    console.log('📊 [app.js] STATE.albums:', STATE.albums.length);
   } catch (error) {
     console.error('❌ [app.js] Error en bootstrap:', error);
   }

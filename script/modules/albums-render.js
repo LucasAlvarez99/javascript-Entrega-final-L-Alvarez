@@ -1,6 +1,6 @@
 // ============================================
 // ALBUMS-RENDER.JS - Renderizar UI
-// VERSIÓN CORREGIDA
+// VERSIÓN LIMPIA Y FUNCIONAL
 // ============================================
 
 console.log('🎨 [albums-render.js] Iniciando módulo de renderizado...');
@@ -10,7 +10,10 @@ console.log('🎨 [albums-render.js] Iniciando módulo de renderizado...');
 // ============================================
 
 function renderAlbums(bandId) {
-    console.log('🎨 [albums-render] renderAlbums llamado');
+    console.log('');
+    console.log('🎨 ==========================================');
+    console.log('🎨 [albums-render] RENDERIZAR ÁLBUMES');
+    console.log('🎨 ==========================================');
     console.log('📊 [albums-render] BandId recibido:', bandId);
     
     const albumsList = document.getElementById('albums-list');
@@ -33,84 +36,89 @@ function renderAlbums(bandId) {
         console.log('💾 [albums-render] BandId guardado en STATE');
     }
     
-    // ✅ CARGAR ÁLBUMES DEL LOCALSTORAGE
-    const savedAlbums = localStorage.getItem('albums');
-    if (savedAlbums) {
-        try {
-            const parsedAlbums = JSON.parse(savedAlbums);
-            if (Array.isArray(parsedAlbums)) {
-                window.STATE.albums = [...window.STATE.albums, ...parsedAlbums];
-                console.log(`📀 [albums-render] ${parsedAlbums.length} álbumes cargados desde localStorage`);
-            }
-        } catch (e) {
-            console.error('❌ [albums-render] Error al parsear álbumes:', e);
-        }
+    // Verificar banda
+    const band = window.albumsCore.findBandById(bandId);
+    if (!band) {
+        console.error('❌ [albums-render] BANDA NO ENCONTRADA');
+        console.log('📊 [albums-render] Bandas disponibles:', window.STATE.bands.map(b => ({ id: b.id, name: b.name })));
+        albumsList.innerHTML = `
+            <div class="card" style="background: rgba(244,67,54,0.1); border: 2px solid #f44336; padding: 20px;">
+                <h3 style="color: #f44336;">❌ Error: Banda no encontrada</h3>
+                <p style="color: #fff;">ID buscado: ${bandId}</p>
+                <p style="color: #9aa4b2;">Verifica la consola para más detalles</p>
+            </div>
+        `;
+        return;
     }
     
-    // Obtener álbumes de la banda
-    const allAlbums = window.STATE.albums || [];
-    const bandAlbums = bandId ? 
-        allAlbums.filter(a => a.bandId === bandId) : 
-        allAlbums;
+    console.log('✅ [albums-render] Banda encontrada:', band.name);
     
-    console.log(`📊 [albums-render] Total álbumes: ${allAlbums.length}`);
-    console.log(`📊 [albums-render] Álbumes de esta banda: ${bandAlbums.length}`);
+    // Obtener TODOS los álbumes
+    const allAlbums = window.STATE.albums || [];
+    console.log('📊 [albums-render] Total álbumes en STATE:', allAlbums.length);
+    
+    // Filtrar álbumes de esta banda
+    const bandAlbums = allAlbums.filter(a => a.bandId === bandId);
+    console.log('📊 [albums-render] Álbumes de esta banda:', bandAlbums.length);
+    
+    if (bandAlbums.length > 0) {
+        console.log('📀 [albums-render] Álbumes encontrados:');
+        bandAlbums.forEach((a, i) => {
+            console.log(`  ${i + 1}. ${a.title} (${a.tracks?.length || 0} canciones)`);
+        });
+    }
     
     // Crear HTML
     let html = '';
     
-    // Botón para agregar álbum (solo si hay banda seleccionada)
+    // Botón para agregar álbum
     if (bandId) {
-        console.log('🏗️ [albums-render] Agregando botón de crear álbum');
+        console.log('➕ [albums-render] Agregando botón de crear álbum');
         html += `
-            <div class="card album add-album" onclick="window.showAlbumForm('${bandId}')" style="cursor:pointer;">
-                <div class="thumb" style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    background: rgba(255,167,38,0.1);
-                    border: 2px dashed var(--accent);
-                ">
-                    <span style="font-size: 48px; margin-bottom: 8px;">➕</span>
-                    <span style="color: var(--accent); font-weight: 600;">Agregar álbum</span>
+            <div class="card album add-album" onclick="window.showAlbumForm('${bandId}')" style="
+                cursor: pointer;
+                background: rgba(255,167,38,0.1);
+                border: 2px dashed var(--accent);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 200px;
+            ">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">➕</div>
+                    <div style="color: var(--accent); font-weight: 600;">Agregar álbum</div>
                 </div>
             </div>
         `;
     }
     
-    // Renderizar álbumes existentes
+    // Renderizar álbumes
     if (bandAlbums.length === 0) {
-        console.log('ℹ️ [albums-render] No hay álbumes para mostrar');
-        if (!bandId) {
-            html += `
-                <div class="card empty-state">
-                    <p>Selecciona una banda para ver sus álbumes</p>
-                </div>
-            `;
-        } else {
-            html += `
-                <div class="card empty-state">
-                    <p>No hay álbumes</p>
+        console.log('ℹ️ [albums-render] No hay álbumes');
+        html += `
+            <div class="card" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; color: #666;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">💿</div>
+                    <p style="margin: 0 0 8px 0;">No hay álbumes</p>
                     <small>Haz clic en ➕ para agregar uno</small>
                 </div>
-            `;
-        }
+            </div>
+        `;
     } else {
-        console.log('🏗️ [albums-render] Generando HTML de álbumes...');
+        console.log('🏗️ [albums-render] Generando HTML...');
         bandAlbums.forEach((album, index) => {
-            console.log(`  📀 Álbum ${index + 1}:`, album.title);
-            const band = window.albumsCore.findBandById(album.bandId);
-            
+            console.log(`  🏗️ Card ${index + 1}: ${album.title}`);
             html += createAlbumCardHTML(album, band);
         });
     }
     
     // Insertar HTML
     albumsList.innerHTML = html;
-    console.log('✅ [albums-render] Álbumes renderizados correctamente');
+    console.log('✅ [albums-render] HTML insertado');
+    console.log('🎨 ==========================================');
+    console.log('');
     
-    // Scroll suave a la sección
+    // Scroll
     const albumsSection = document.getElementById('albums-section');
     if (albumsSection) {
         albumsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -122,45 +130,77 @@ function renderAlbums(bandId) {
 // ============================================
 
 function createAlbumCardHTML(album, band) {
-    console.log('🏗️ [albums-render] Creando card para:', album.title);
-    
-    const bandName = band ? band.name : 'Banda desconocida';
+    const bandName = band ? band.name : 'Banda';
     const trackCount = album.tracks ? album.tracks.length : 0;
     
     return `
-        <div class="card album" data-album-id="${album.id}">
-            <div class="thumb">
+        <div class="card album" data-album-id="${album.id}" style="
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        ">
+            <div class="thumb" style="
+                width: 100%;
+                height: 150px;
+                border-radius: 8px;
+                overflow: hidden;
+                margin-bottom: 12px;
+            ">
                 <img src="${album.cover}" 
                      alt="${album.title}" 
-                     style="width:100%;height:100%;object-fit:cover;border-radius:6px">
+                     style="width:100%;height:100%;object-fit:cover;">
             </div>
-            <div class="info">
-                <h4>${album.title}</h4>
-                <div class="meta">${bandName} · ${album.year}</div>
-                <small style="color:#9aa4b2;">${trackCount} canciones</small>
+            
+            <h4 style="margin: 0 0 4px 0; color: #fff;">${album.title}</h4>
+            <div class="meta" style="color: #9aa4b2; font-size: 0.9rem; margin-bottom: 4px;">
+                ${bandName} · ${album.year}
             </div>
-            <div class="actions" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;gap:8px;">
-                    <button type="button" 
-                            class="btn btn-primary" 
-                            onclick="window.verCanciones('${album.id}')"
-                            title="Ver canciones"
-                            style="flex:1;">
+            <small style="color: #9aa4b2;">🎵 ${trackCount} canciones</small>
+            
+            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="window.verCanciones('${album.id}')" 
+                            class="btn" 
+                            style="
+                                flex: 1;
+                                padding: 10px;
+                                background: rgba(33,150,243,0.2);
+                                color: #2196f3;
+                                border: 1px solid #2196f3;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-weight: 600;
+                            ">
                         🎵 Ver
                     </button>
-                    <button type="button" 
-                            class="btn" 
-                            onclick="window.showAddSongsModal('${album.id}')"
-                            title="Agregar más canciones"
-                            style="flex:1; background: var(--accent); color: #000;">
+                    <button onclick="window.showAddSongsModal('${album.id}')" 
+                            class="btn"
+                            style="
+                                flex: 1;
+                                padding: 10px;
+                                background: var(--accent);
+                                color: #000;
+                                border: none;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-weight: 600;
+                            ">
                         ➕ Canciones
                     </button>
                 </div>
-                <button type="button" 
-                        class="btn btn-secondary" 
-                        onclick="window.agregarAlbumAPlaylist('${album.id}')"
-                        title="Agregar todo a playlist"
-                        style="width:100%;">
+                <button onclick="window.agregarAlbumAPlaylist('${album.id}')"
+                        class="btn"
+                        style="
+                            width: 100%;
+                            padding: 10px;
+                            background: rgba(76,175,80,0.2);
+                            color: #4caf50;
+                            border: 1px solid #4caf50;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-weight: 600;
+                        ">
                     📋 Agregar a Playlist
                 </button>
             </div>
@@ -169,7 +209,7 @@ function createAlbumCardHTML(album, band) {
 }
 
 // ============================================
-// RENDERIZAR CANCIONES DE ÁLBUM
+// RENDERIZAR CANCIONES
 // ============================================
 
 function renderSongs(albumId) {
@@ -182,252 +222,86 @@ function renderSongs(albumId) {
         return;
     }
     
-    console.log('✅ [albums-render] Sección de canciones encontrada');
-    
-    // Buscar álbum
     const album = window.albumsCore.findAlbumById(albumId);
     if (!album) {
         console.error('❌ [albums-render] Álbum no encontrado');
-        songsSection.innerHTML = `
-            <div class="card empty-state">
-                <p>❌ Álbum no encontrado</p>
-            </div>
-        `;
+        songsSection.innerHTML = `<div class="card">❌ Álbum no encontrado</div>`;
         return;
     }
     
     console.log('✅ [albums-render] Álbum encontrado:', album.title);
-    console.log('📊 [albums-render] Canciones:', album.tracks.length);
     
-    // Buscar banda
     const band = window.albumsCore.findBandById(album.bandId);
-    const bandName = band ? band.name : 'Banda desconocida';
+    const bandName = band ? band.name : 'Banda';
     
-    console.log('🏗️ [albums-render] Generando HTML de canciones...');
-    
-    // Generar HTML
     songsSection.innerHTML = `
-        <div class="album-header">
+        <div class="album-header" style="
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            padding: 24px;
+            background: rgba(255,167,38,0.1);
+            border-radius: 12px;
+        ">
             <img src="${album.cover}" 
                  alt="${album.title}" 
-                 class="album-cover">
-            <div class="album-info">
-                <h3>${album.title}</h3>
-                <p>💿 ${bandName} · ${album.year}</p>
-                <small>${album.tracks.length} canciones</small>
+                 style="width: 150px; height: 150px; border-radius: 12px; object-fit: cover;">
+            <div>
+                <h3 style="margin: 0 0 8px 0; color: var(--accent);">${album.title}</h3>
+                <p style="margin: 0 0 4px 0; color: #9aa4b2;">💿 ${bandName} · ${album.year}</p>
+                <small style="color: #9aa4b2;">🎵 ${album.tracks.length} canciones</small>
             </div>
         </div>
         
-        <div id="player-container" class="player-container">
-            <div class="player">
-                <h3>🎵 Reproductor (Solo Audio)</h3>
-                <div id="youtube-player"></div>
-                <div id="now-playing">Selecciona una canción para reproducir</div>
-                <div class="player-controls">
-                    <button id="play-btn" 
-                            onclick="togglePlay()" 
-                            disabled
-                            title="Play">
-                        ▶️
-                    </button>
-                    <button id="pause-btn" 
-                            onclick="pauseTrack()" 
-                            disabled
-                            title="Pause">
-                        ⏸️
-                    </button>
-                    <button id="stop-btn" 
-                            onclick="stopTrack()" 
-                            disabled
-                            title="Stop">
-                        ⏹️
-                    </button>
+        <div class="songs-list" style="display: flex; flex-direction: column; gap: 8px;">
+            ${album.tracks.map((track, index) => `
+                <div class="song" data-track-id="${track.id}" style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px;
+                    background: var(--card);
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                ">
+                    <div>
+                        <div style="color: #fff; font-weight: 500;">${track.title}</div>
+                        <small style="color: #9aa4b2;">⏱️ ${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}</small>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="playTrack('${album.id}', '${track.id}')" 
+                                class="btn" 
+                                style="padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: 6px; cursor: pointer;">
+                            ▶️
+                        </button>
+                        <button onclick="addToPlaylist('${album.id}', '${track.id}')"
+                                class="btn"
+                                style="padding: 8px 16px; background: rgba(76,175,80,0.2); color: #4caf50; border: 1px solid #4caf50; border-radius: 6px; cursor: pointer;">
+                            ➕
+                        </button>
+                    </div>
                 </div>
-                <div class="progress">
-                    <div id="progress-bar"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="songs-list">
-            ${album.tracks.map((track, index) => {
-                console.log(`  🎵 Track ${index + 1}:`, track.title);
-                return createSongItemHTML(track, album.id, index);
-            }).join('')}
+            `).join('')}
         </div>
     `;
     
-    console.log('✅ [albums-render] Canciones renderizadas correctamente');
-    
-    // Scroll a la sección
     songsSection.scrollIntoView({ behavior: 'smooth' });
-    console.log('📜 [albums-render] Scroll a sección de canciones');
 }
 
 // ============================================
-// CREAR HTML DE ÍTEM DE CANCIÓN
-// ============================================
-
-function createSongItemHTML(track, albumId, index) {
-    const minutes = Math.floor(track.duration / 60);
-    const seconds = String(track.duration % 60).padStart(2, '0');
-    
-    return `
-        <div class="song" data-track-id="${track.id}">
-            <div class="info">
-                <div class="title">${track.title}</div>
-                <div class="duration">⏱️ ${minutes}:${seconds}</div>
-            </div>
-            <div class="actions">
-                <button class="btn play" 
-                        onclick="playTrack('${albumId}', '${track.id}')"
-                        title="Reproducir">
-                    ▶️
-                </button>
-                <button class="btn add" 
-                        onclick="addToPlaylist('${albumId}', '${track.id}')"
-                        title="Agregar a playlist">
-                    ➕
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// RENDERIZAR PLAYLIST
+// OTRAS FUNCIONES
 // ============================================
 
 function renderPlaylist() {
-    console.log('🎵 [albums-render] renderPlaylist llamado');
-    
-    const playlistElement = document.getElementById('playlist');
-    if (!playlistElement) {
-        console.warn('⚠️ [albums-render] Elemento playlist no encontrado');
-        return;
-    }
-    
-    console.log('✅ [albums-render] Elemento playlist encontrado');
-    
-    if (!window.STATE.playlist) {
-        window.STATE.playlist = [];
-    }
-    
-    console.log('📊 [albums-render] Canciones en playlist:', window.STATE.playlist.length);
-    
-    if (window.STATE.playlist.length === 0) {
-        console.log('ℹ️ [albums-render] Playlist vacía');
-        playlistElement.innerHTML = `
-            <div class="empty-playlist">
-                <p>🎵 Tu playlist está vacía</p>
-                <small>Agrega canciones usando el botón + en cada canción</small>
-            </div>
-        `;
-        return;
-    }
-    
-    console.log('🏗️ [albums-render] Generando HTML de playlist...');
-    playlistElement.innerHTML = `
-        <div class="playlist-header">
-            <h3>Mi Playlist</h3>
-            <span class="count">${window.STATE.playlist.length} canciones</span>
-        </div>
-        <div class="playlist-tracks">
-            ${window.STATE.playlist.map((track, index) => {
-                console.log(`  🎵 Playlist ${index + 1}:`, track.title);
-                return createPlaylistItemHTML(track, index);
-            }).join('')}
-        </div>
-    `;
-    
-    console.log('✅ [albums-render] Playlist renderizada correctamente');
+    console.log('📋 [albums-render] renderPlaylist - pendiente');
 }
-
-// ============================================
-// CREAR HTML DE ÍTEM DE PLAYLIST
-// ============================================
-
-function createPlaylistItemHTML(track, index) {
-    return `
-        <div class="playlist-item" data-track-id="${track.id}">
-            <span class="number">${index + 1}</span>
-            <div class="info">
-                <div class="title">${track.title}</div>
-                <div class="meta">${track.album || 'Álbum'} · ${track.artist || 'Artista'}</div>
-            </div>
-            <div class="actions">
-                <button class="btn play" 
-                        onclick="playTrack('${track.albumId}', '${track.id}')"
-                        title="Reproducir">
-                    ▶️
-                </button>
-                <button class="btn remove" 
-                        onclick="removeFromPlaylist('${track.id}')"
-                        title="Eliminar">
-                    ❌
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// ACTUALIZAR "NOW PLAYING"
-// ============================================
 
 function updateNowPlaying(track, album) {
-    console.log('🎵 [albums-render] updateNowPlaying llamado');
-    console.log('📊 [albums-render] Track:', track.title);
-    console.log('📊 [albums-render] Album:', album.title);
-    
-    const nowPlaying = document.getElementById('now-playing');
-    if (!nowPlaying) {
-        console.error('❌ [albums-render] now-playing no encontrado');
-        return;
-    }
-    
-    const band = window.albumsCore.findBandById(album.bandId);
-    const bandName = band ? band.name : 'Artista';
-    
-    console.log('🏗️ [albums-render] Actualizando información de reproducción...');
-    
-    nowPlaying.innerHTML = `
-        <div class="now-playing-card">
-            <div class="now-playing-icon">🎵</div>
-            <div class="now-playing-info">
-                <div class="track-title">${track.title}</div>
-                <div class="track-meta">
-                    ${album.title} · ${bandName}
-                </div>
-            </div>
-            <div class="playing-animation">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-    `;
-    
-    console.log('✅ [albums-render] Now playing actualizado');
+    console.log('🎵 [albums-render] updateNowPlaying');
 }
 
-// ============================================
-// RESALTAR CANCIÓN ACTUAL
-// ============================================
-
 function highlightCurrentTrack(trackId) {
-    console.log('🎨 [albums-render] highlightCurrentTrack llamado');
-    console.log('📊 [albums-render] Track ID:', trackId);
-    
-    const previousHighlight = document.querySelectorAll('.song.playing');
-    console.log(`🧹 [albums-render] Removiendo ${previousHighlight.length} highlights previos`);
-    previousHighlight.forEach(song => song.classList.remove('playing'));
-    
-    const currentSong = document.querySelector(`[data-track-id="${trackId}"]`);
-    if (currentSong) {
-        currentSong.classList.add('playing');
-        console.log('✅ [albums-render] Track resaltado correctamente');
-    } else {
-        console.warn('⚠️ [albums-render] Track no encontrado en DOM');
-    }
+    console.log('🎨 [albums-render] highlightCurrentTrack');
 }
 
 // ============================================
@@ -442,14 +316,11 @@ window.albumsRender = {
     highlightCurrentTrack
 };
 
-// Alias globales
 window.verCanciones = renderSongs;
 window.agregarAlbumAPlaylist = function(albumId) {
-    console.log('➕ [albums-render] Agregando álbum completo a playlist:', albumId);
-    if (window.playlistManager && window.playlistManager.addAlbum) {
-        window.playlistManager.addAlbum(albumId);
-    }
+    console.log('➕ Agregar álbum completo a playlist:', albumId);
+    window.albumsCore.showToast('Función en desarrollo', 'info');
 };
 
-console.log('✅ [albums-render.js] Módulo de renderizado cargado');
-console.log('📦 [albums-render.js] Funciones disponibles:', Object.keys(window.albumsRender));
+console.log('✅ [albums-render.js] Módulo cargado');
+console.log('📦 [albums-render.js] Funciones:', Object.keys(window.albumsRender));
