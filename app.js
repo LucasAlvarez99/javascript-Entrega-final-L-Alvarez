@@ -1,22 +1,29 @@
-/* app.js - La Disquera - VERSIÓN FINAL ARREGLADA
-   Arregla el problema de bandId no encontrado
-*/
+/* app.js - La Disquera - VERSIÓN CORREGIDA */
 
 console.log('🎸 [app.js] Iniciando...');
 
-const STATE = {
-  bands: [],
-  albums: [],
-  genres: new Set(),
-  playlist: [],
-  currentBandId: null,
-  currentAlbumId: null,
-  currentTrack: null,
-  isPlaying: false,
-  progressTimer: null,
-  youtubePlayer: null,
-  tempYoutubeLinks: []
-};
+// 🔥 CRÍTICO: Declarar STATE global ANTES que cualquier otra cosa
+if (!window.STATE) {
+  window.STATE = {
+    bands: [],
+    albums: [],
+    genres: new Set(),
+    playlist: [],
+    currentBandId: null,
+    currentAlbumId: null,
+    currentTrack: null,
+    isPlaying: false,
+    progressTimer: null,
+    youtubePlayer: null,
+    tempYoutubeLinks: []
+  };
+  console.log('✅ [app.js] STATE creado globalmente');
+} else {
+  console.log('ℹ️ [app.js] STATE ya existía');
+}
+
+// Alias local para facilitar el código
+const STATE = window.STATE;
 
 const $ = sel => document.querySelector(sel);
 const $all = sel => Array.from(document.querySelectorAll(sel));
@@ -27,29 +34,79 @@ async function loadData() {
   
   try {
     const res = await fetch('data.json');
-    if (!res.ok) throw new Error('No se pudo cargar data.json');
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
     
-    console.log('✅ [app.js] data.json cargado');
-    console.log('📊 [app.js] Bandas del JSON:', data.bands.length);
-    console.log('📊 [app.js] Álbumes del JSON:', data.albums.length);
+    console.log('✅ [app.js] data.json cargado exitosamente');
+    console.log('📊 [app.js] Bandas del JSON:', data.bands);
+    console.log('📊 [app.js] Álbumes del JSON:', data.albums);
 
+    // Cargar bandas guardadas
     const storedBands = JSON.parse(localStorage.getItem('disquera_bands') || '[]');
-    console.log(`📊 [app.js] ${storedBands.length} bandas guardadas encontradas`);
+    console.log(`📊 [app.js] Bandas guardadas:`, storedBands.length);
     
+    // Combinar bandas del JSON con guardadas
     STATE.bands = [...data.bands, ...storedBands];
-    STATE.albums = data.albums; // ✅ IMPORTANTE: Cargar álbumes del JSON
+    STATE.albums = data.albums || [];
+    
+    // Extraer géneros
     STATE.bands.forEach(b => STATE.genres.add(b.genre));
     
-    console.log(`✅ [app.js] ${STATE.bands.length} bandas cargadas en total`);
-    console.log(`✅ [app.js] ${STATE.albums.length} álbumes cargados en total`);
+    console.log(`✅ [app.js] ${STATE.bands.length} bandas cargadas`);
+    console.log(`✅ [app.js] ${STATE.albums.length} álbumes cargados`);
+    
+    // 🔥 VERIFICACIÓN CRÍTICA
+    if (STATE.bands.length === 0) {
+      console.error('❌ [app.js] NO HAY BANDAS CARGADAS');
+      console.error('📊 [app.js] Data recibida:', data);
+    } else {
+      console.log('✅ [app.js] Bandas disponibles:');
+      STATE.bands.forEach(b => {
+        console.log(`  - ${b.name} (ID: ${b.id})`);
+      });
+    }
     
     return data;
   } catch (error) {
     console.error('❌ [app.js] Error al cargar datos:', error);
-    STATE.bands = [];
+    console.error('📊 [app.js] Detalles del error:', {
+      message: error.message,
+      stack: error.stack
+    });
+    
+    // 🔥 FALLBACK: Cargar bandas por defecto si falla
+    console.warn('⚠️ [app.js] Cargando bandas por defecto...');
+    STATE.bands = [
+      {
+        id: "b1",
+        name: "Máquina de Fuego",
+        genre: "Heavy Metal",
+        bio: "Trío de heavy metal clásico con riffs potentes.",
+        img: "https://picsum.photos/seed/metal1/400/250"
+      },
+      {
+        id: "b2",
+        name: "Eco Urbano",
+        genre: "Rock Alternativo",
+        bio: "Fusión de rock y electrónica, atmósferas densas.",
+        img: "https://picsum.photos/seed/rock2/400/250"
+      },
+      {
+        id: "b3",
+        name: "Los Vinilos",
+        genre: "Indie",
+        bio: "Melodías íntimas y letras directas.",
+        img: "https://picsum.photos/seed/indie3/400/250"
+      }
+    ];
     STATE.albums = [];
-    return { bands: [], albums: [] };
+    STATE.bands.forEach(b => STATE.genres.add(b.genre));
+    
+    console.log('✅ [app.js] Bandas por defecto cargadas:', STATE.bands.length);
+    
+    return { bands: STATE.bands, albums: [] };
   }
 }
 
@@ -254,26 +311,52 @@ function renderGenres() {
   console.log('🎨 [app.js] Renderizando géneros...');
   
   const sel = $('#genre-filter');
-  if (!sel) return;
+  if (!sel) {
+    console.warn('⚠️ [app.js] Selector de géneros no encontrado');
+    return;
+  }
   
   sel.innerHTML = `<option value="">Todos los géneros</option>`;
-  Array.from(new Set(STATE.bands.map(b => b.genre))).forEach(g => {
+  Array.from(STATE.genres).forEach(g => {
     const opt = document.createElement('option');
     opt.value = g;
     opt.textContent = g;
     sel.appendChild(opt);
   });
   
-  console.log('✅ [app.js] Géneros renderizados');
+  console.log('✅ [app.js] Géneros renderizados:', STATE.genres.size);
 }
 
 function renderBands(filterText = '', genre = '') {
-  console.log('🎨 [app.js] Renderizando bandas...');
-  console.log('📊 [app.js] Filtros:', { filterText, genre });
+  console.log('');
+  console.log('🎨 ==========================================');
+  console.log('🎨 [app.js] RENDERIZANDO BANDAS');
+  console.log('🎨 ==========================================');
   console.log('📊 [app.js] Total bandas en STATE:', STATE.bands.length);
+  console.log('📊 [app.js] Filtros:', { filterText, genre });
   
   const container = $('#bands-list');
-  if (!container) return;
+  if (!container) {
+    console.error('❌ [app.js] Contenedor bands-list no encontrado');
+    return;
+  }
+  
+  console.log('✅ [app.js] Contenedor encontrado');
+  
+  // 🔥 VERIFICACIÓN CRÍTICA
+  if (!STATE.bands || STATE.bands.length === 0) {
+    console.error('❌❌❌ [app.js] NO HAY BANDAS EN STATE');
+    container.innerHTML = `
+      <div class="card" style="background: rgba(244,67,54,0.1); border: 2px solid #f44336; padding: 20px;">
+        <h3 style="color: #f44336;">❌ Error: No hay bandas cargadas</h3>
+        <p style="color: #fff; margin: 12px 0;">El archivo data.json no se cargó correctamente.</p>
+        <button class="btn" onclick="location.reload()" style="margin-top: 12px;">
+          🔄 Recargar página
+        </button>
+      </div>
+    `;
+    return;
+  }
   
   container.innerHTML = '';
   
@@ -286,12 +369,17 @@ function renderBands(filterText = '', genre = '') {
   console.log(`📊 [app.js] ${list.length} bandas filtradas`);
   
   if (list.length === 0) {
-    container.innerHTML = `<div class="card">No hay bandas</div>`;
+    container.innerHTML = `
+      <div class="card" style="text-align: center; padding: 40px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🎸</div>
+        <p style="color: #9aa4b2;">No se encontraron bandas</p>
+      </div>
+    `;
     return;
   }
 
   list.forEach(b => {
-    console.log(`  🎸 Renderizando banda: ${b.name} (ID: ${b.id})`); // ✅ LOG IMPORTANTE
+    console.log(`  🎸 Renderizando: ${b.name} (ID: ${b.id})`);
     
     const node = document.createElement('div');
     node.className = 'card band';
@@ -317,42 +405,54 @@ function renderBands(filterText = '', genre = '') {
     container.appendChild(node);
   });
 
-  // ✅ EVENTOS - CRÍTICO
+  // Eventos
   $all('.view-albums').forEach(btn => {
     btn.onclick = e => {
       const bandId = e.currentTarget.dataset.band;
-      console.log('👁️ [app.js] ========================================');
+      
+      console.log('');
+      console.log('👁️ ==========================================');
       console.log('👁️ [app.js] CLICK EN VER ÁLBUMES');
-      console.log('👁️ [app.js] Band ID del botón:', bandId);
-      console.log('👁️ [app.js] ========================================');
+      console.log('👁️ ==========================================');
+      console.log('📊 [app.js] Band ID del botón:', bandId);
       
-      // ✅ GUARDAR EN STATE
-      STATE.currentBandId = bandId;
-      console.log('💾 [app.js] currentBandId guardado en STATE:', STATE.currentBandId);
+      // Verificar que la banda existe ANTES de intentar renderizar
+      const banda = STATE.bands.find(b => b.id === bandId);
       
-      // ✅ VERIFICAR QUE LA BANDA EXISTE
-      const band = STATE.bands.find(b => b.id === bandId);
-      if (band) {
-        console.log('✅ [app.js] Banda encontrada:', band.name);
-      } else {
-        console.error('❌ [app.js] Banda NO encontrada con ID:', bandId);
-        console.log('📊 [app.js] Bandas disponibles:', STATE.bands.map(b => ({ id: b.id, name: b.name })));
+      if (!banda) {
+        console.error('❌ [app.js] BANDA NO ENCONTRADA EN STATE');
+        console.error('📊 [app.js] Bandas disponibles:');
+        STATE.bands.forEach(b => {
+          console.error(`  - ${b.name} (ID: ${b.id})`);
+        });
+        window.albumsCore.showToast('❌ Error: Banda no encontrada', 'error');
+        return;
       }
       
-      // ✅ LLAMAR A RENDER ALBUMS
+      console.log('✅ [app.js] Banda encontrada:', banda.name);
+      
+      // Guardar en STATE
+      STATE.currentBandId = bandId;
+      console.log('💾 [app.js] currentBandId guardado:', STATE.currentBandId);
+      
+      // Llamar a renderAlbums
       if (window.albumsRender && typeof window.albumsRender.renderAlbums === 'function') {
         console.log('📞 [app.js] Llamando a albumsRender.renderAlbums...');
         window.albumsRender.renderAlbums(bandId);
       } else {
         console.error('❌ [app.js] albumsRender.renderAlbums NO disponible');
+        window.albumsCore.showToast('❌ Error: Módulo de renderizado no disponible', 'error');
       }
       
-      // ✅ SCROLL
+      // Scroll
       const albumsSection = document.getElementById('albums-section');
       if (albumsSection) {
         albumsSection.scrollIntoView({behavior:'smooth'});
         console.log('📜 [app.js] Scroll a sección de álbumes');
       }
+      
+      console.log('👁️ ==========================================');
+      console.log('');
     };
   });
 
@@ -362,7 +462,9 @@ function renderBands(filterText = '', genre = '') {
     };
   });
   
-  console.log('✅ [app.js] Bandas renderizadas');
+  console.log('✅ [app.js] Bandas renderizadas exitosamente');
+  console.log('🎨 ==========================================');
+  console.log('');
 }
 
 /* ------------------ EVENTOS / UI ------------------ */
@@ -440,27 +542,78 @@ function bindUI() {
 }
 
 function finalizeBandCreation(newBand) {
-  console.log('✅ [app.js] Finalizando creación de banda...');
+  console.log('');
+  console.log('✅ ==========================================');
+  console.log('✅ [app.js] CREANDO NUEVA BANDA');
+  console.log('✅ ==========================================');
+  console.log('📊 [app.js] Datos de la banda:', newBand);
   
+  // 1. Agregar al STATE
   STATE.bands.push(newBand);
-  STATE.genres.add(newBand.genre);
+  console.log(`📊 [app.js] Total bandas ahora: ${STATE.bands.length}`);
   
+  // 2. Agregar género
+  STATE.genres.add(newBand.genre);
+  console.log(`📊 [app.js] Géneros ahora: ${STATE.genres.size}`);
+  
+  // 3. Guardar en localStorage
+  console.log('💾 [app.js] Guardando en localStorage...');
   saveBandsToLocalStorage();
   
+  // 4. Verificar que se guardó
+  const verificacion = JSON.parse(localStorage.getItem('disquera_bands') || '[]');
+  console.log('✅ [app.js] Bandas guardadas verificadas:', verificacion.length);
+  
+  // 5. LOG: Mostrar la banda recién creada
+  console.log('🎸 [app.js] Banda recién creada:');
+  console.log(`  - Nombre: ${newBand.name}`);
+  console.log(`  - ID: ${newBand.id}`);
+  console.log(`  - Género: ${newBand.genre}`);
+  console.log(`  - Canciones: ${newBand.youtube ? newBand.youtube.length : 0}`);
+  
+  // 6. Limpiar formulario
   const form = $('#band-form');
-  if (form) form.reset();
+  if (form) {
+    form.reset();
+    console.log('✅ [app.js] Formulario limpiado');
+  }
   
+  // 7. Limpiar imagen preview
   const preview = $('#preview-img');
-  if (preview) preview.classList.add('hidden');
+  if (preview) {
+    preview.classList.add('hidden');
+    console.log('✅ [app.js] Preview de imagen ocultado');
+  }
   
+  // 8. Limpiar links de YouTube temporales
   STATE.tempYoutubeLinks = [];
   renderYoutubeLinks();
+  console.log('✅ [app.js] Links de YouTube limpiados');
   
+  // 9. Re-renderizar géneros
   renderGenres();
+  console.log('✅ [app.js] Géneros actualizados');
+  
+  // 10. Re-renderizar bandas
+  console.log('🎨 [app.js] Re-renderizando bandas...');
   renderBands();
   
+  // 11. Verificar que la banda está en la lista renderizada
+  console.log('🔍 [app.js] Verificando banda en STATE.bands:');
+  const bandaEncontrada = STATE.bands.find(b => b.id === newBand.id);
+  if (bandaEncontrada) {
+    console.log('✅ [app.js] Banda encontrada en STATE:', bandaEncontrada.name);
+  } else {
+    console.error('❌ [app.js] Banda NO encontrada en STATE');
+  }
+  
+  // 12. Notificación
   window.albumsCore.showToast(`✅ Banda "${newBand.name}" agregada exitosamente`, 'success');
-  console.log('✅ [app.js] Banda creada exitosamente');
+  
+  console.log('✅ ==========================================');
+  console.log('✅ [app.js] BANDA CREADA EXITOSAMENTE');
+  console.log('✅ ==========================================');
+  console.log('');
 }
 
 function applySearchAndFilter() {
@@ -483,26 +636,76 @@ function debounce(fn, ms = 200) {
 
 /* ------------------ INICIO ------------------ */
 async function bootstrap() {
-  console.log('🚀 [app.js] Bootstrap iniciando...');
+  console.log('');
+  console.log('🚀 ==========================================');
+  console.log('🚀 [app.js] BOOTSTRAP INICIANDO');
+  console.log('🚀 ==========================================');
   
   try {
+    // 1. Cargar datos
+    console.log('📦 [app.js] Paso 1: Cargar datos...');
     await loadData();
-    renderGenres();
-    renderBands();
-    bindUI();
+    console.log('✅ [app.js] Datos cargados');
     
-    console.log('✅ [app.js] Bootstrap completado');
-    console.log('📊 [app.js] STATE.bands:', STATE.bands.length);
-    console.log('📊 [app.js] STATE.albums:', STATE.albums.length);
+    // 2. Renderizar géneros
+    console.log('🎨 [app.js] Paso 2: Renderizar géneros...');
+    renderGenres();
+    console.log('✅ [app.js] Géneros renderizados');
+    
+    // 3. Renderizar bandas
+    console.log('🎨 [app.js] Paso 3: Renderizar bandas...');
+    renderBands();
+    console.log('✅ [app.js] Bandas renderizadas');
+    
+    // 4. Configurar eventos
+    console.log('⚙️ [app.js] Paso 4: Configurar eventos...');
+    bindUI();
+    console.log('✅ [app.js] Eventos configurados');
+    
+    console.log('');
+    console.log('🎉 ==========================================');
+    console.log('🎉 [app.js] BOOTSTRAP COMPLETADO');
+    console.log('🎉 ==========================================');
+    console.log('📊 [app.js] Resumen:');
+    console.log(`  - Bandas: ${STATE.bands.length}`);
+    console.log(`  - Álbumes: ${STATE.albums.length}`);
+    console.log(`  - Géneros: ${STATE.genres.size}`);
+    console.log('');
+    
   } catch (error) {
-    console.error('❌ [app.js] Error en bootstrap:', error);
+    console.error('');
+    console.error('❌ ==========================================');
+    console.error('❌ [app.js] ERROR EN BOOTSTRAP');
+    console.error('❌ ==========================================');
+    console.error('❌ [app.js] Error:', error);
+    console.error('❌ [app.js] Stack:', error.stack);
+    console.error('❌ ==========================================');
+    console.error('');
+    
+    // Mostrar error en UI
+    const container = $('#bands-list');
+    if (container) {
+      container.innerHTML = `
+        <div class="card" style="background: rgba(244,67,54,0.1); border: 2px solid #f44336; padding: 20px;">
+          <h3 style="color: #f44336;">❌ Error al cargar la aplicación</h3>
+          <p style="color: #fff; margin: 12px 0;">${error.message}</p>
+          <button class="btn" onclick="location.reload()" style="margin-top: 12px;">
+            🔄 Recargar página
+          </button>
+        </div>
+      `;
+    }
   }
 }
 
-// Exponer funciones globales
+// Exponer funciones globales (STATE ya está expuesto arriba)
 window.removeYoutubeLink = removeYoutubeLink;
 window.deleteBand = deleteBand;
 
 bootstrap();
 
 console.log('✅ [app.js] Inicialización completa');
+console.log('📊 [app.js] Verificando STATE global:');
+console.log('  - window.STATE existe:', !!window.STATE);
+console.log('  - Bandas en STATE:', window.STATE.bands.length);
+console.log('  - Álbumes en STATE:', window.STATE.albums.length);
